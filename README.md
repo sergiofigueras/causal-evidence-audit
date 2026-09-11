@@ -1,6 +1,6 @@
 # Beyond Citation Entailment
 
-This bundle contains the LaTeX manuscript by Sergio Luiz Wermuth Figueras and the complete reproducibility artifact for the 32-item pilot.
+This bundle contains the LaTeX manuscript and the complete reproducibility artifact for the 32-item pilot.
 
 ## Contents
 
@@ -53,7 +53,3 @@ Greedy decoding is deterministic for a fixed software and model snapshot, but ch
 - NumPy 2.0.2
 - `mlx-community/Qwen3-4B-4bit`, revision `4dcb3d101c2a062e5c1d4bb173588c54ea6c4d25`
 - `mlx-community/Llama-3.2-3B-Instruct-4bit`, revision `7f0dc925e0d0afb0322d96f9255cfddf2ba5636e`
-
-## Integrity note
-
-This is an AI-assisted research draft, not a peer-reviewed or accepted publication. Every numerical claim is traceable to the included raw outputs. Before submission, the author should independently verify the literature, rerun the experiment, review the scoring rules, and decide on an appropriate license and venue.
