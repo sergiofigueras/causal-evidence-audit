@@ -1,0 +1,1170 @@
+[
+  {
+    "id": "direct-01",
+    "family": "direct",
+    "question": "Which coolant is currently authorized for Reactor-17?",
+    "answers": [
+      "Avenite",
+      "Borelite"
+    ],
+    "worlds": [
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-17 is Avenite.",
+        "D2": "Reactor-17 was commissioned during audit cycle 40.",
+        "D3": "A preliminary trial evaluated both Avenite and Borelite without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      },
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-17 is Borelite.",
+        "D2": "Reactor-17 was commissioned during audit cycle 40.",
+        "D3": "A preliminary trial evaluated both Avenite and Borelite without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1"
+      ],
+      [
+        "D1"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "direct-02",
+    "family": "direct",
+    "question": "Which coolant is currently authorized for Reactor-18?",
+    "answers": [
+      "Ceryx",
+      "Dovran"
+    ],
+    "worlds": [
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-18 is Ceryx.",
+        "D2": "Reactor-18 was commissioned during audit cycle 41.",
+        "D3": "A preliminary trial evaluated both Ceryx and Dovran without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      },
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-18 is Dovran.",
+        "D2": "Reactor-18 was commissioned during audit cycle 41.",
+        "D3": "A preliminary trial evaluated both Ceryx and Dovran without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1"
+      ],
+      [
+        "D1"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "direct-03",
+    "family": "direct",
+    "question": "Which coolant is currently authorized for Reactor-19?",
+    "answers": [
+      "Elnor",
+      "Fasmin"
+    ],
+    "worlds": [
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-19 is Elnor.",
+        "D2": "Reactor-19 was commissioned during audit cycle 42.",
+        "D3": "A preliminary trial evaluated both Elnor and Fasmin without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      },
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-19 is Fasmin.",
+        "D2": "Reactor-19 was commissioned during audit cycle 42.",
+        "D3": "A preliminary trial evaluated both Elnor and Fasmin without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1"
+      ],
+      [
+        "D1"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "direct-04",
+    "family": "direct",
+    "question": "Which coolant is currently authorized for Reactor-20?",
+    "answers": [
+      "Galdite",
+      "Hesper"
+    ],
+    "worlds": [
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-20 is Galdite.",
+        "D2": "Reactor-20 was commissioned during audit cycle 43.",
+        "D3": "A preliminary trial evaluated both Galdite and Hesper without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      },
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-20 is Hesper.",
+        "D2": "Reactor-20 was commissioned during audit cycle 43.",
+        "D3": "A preliminary trial evaluated both Galdite and Hesper without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1"
+      ],
+      [
+        "D1"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "direct-05",
+    "family": "direct",
+    "question": "Which coolant is currently authorized for Reactor-21?",
+    "answers": [
+      "Ilyron",
+      "Jaspar"
+    ],
+    "worlds": [
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-21 is Ilyron.",
+        "D2": "Reactor-21 was commissioned during audit cycle 44.",
+        "D3": "A preliminary trial evaluated both Ilyron and Jaspar without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      },
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-21 is Jaspar.",
+        "D2": "Reactor-21 was commissioned during audit cycle 44.",
+        "D3": "A preliminary trial evaluated both Ilyron and Jaspar without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1"
+      ],
+      [
+        "D1"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "direct-06",
+    "family": "direct",
+    "question": "Which coolant is currently authorized for Reactor-22?",
+    "answers": [
+      "Kelmite",
+      "Lunex"
+    ],
+    "worlds": [
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-22 is Kelmite.",
+        "D2": "Reactor-22 was commissioned during audit cycle 45.",
+        "D3": "A preliminary trial evaluated both Kelmite and Lunex without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      },
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-22 is Lunex.",
+        "D2": "Reactor-22 was commissioned during audit cycle 45.",
+        "D3": "A preliminary trial evaluated both Kelmite and Lunex without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1"
+      ],
+      [
+        "D1"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "direct-07",
+    "family": "direct",
+    "question": "Which coolant is currently authorized for Reactor-23?",
+    "answers": [
+      "Mavrin",
+      "Norell"
+    ],
+    "worlds": [
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-23 is Mavrin.",
+        "D2": "Reactor-23 was commissioned during audit cycle 46.",
+        "D3": "A preliminary trial evaluated both Mavrin and Norell without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      },
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-23 is Norell.",
+        "D2": "Reactor-23 was commissioned during audit cycle 46.",
+        "D3": "A preliminary trial evaluated both Mavrin and Norell without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1"
+      ],
+      [
+        "D1"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "direct-08",
+    "family": "direct",
+    "question": "Which coolant is currently authorized for Reactor-24?",
+    "answers": [
+      "Orphite",
+      "Praxen"
+    ],
+    "worlds": [
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-24 is Orphite.",
+        "D2": "Reactor-24 was commissioned during audit cycle 47.",
+        "D3": "A preliminary trial evaluated both Orphite and Praxen without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      },
+      {
+        "D1": "The current registry states that the authorized coolant for Reactor-24 is Praxen.",
+        "D2": "Reactor-24 was commissioned during audit cycle 47.",
+        "D3": "A preliminary trial evaluated both Orphite and Praxen without authorizing either.",
+        "D4": "Authorization is defined by the current registry, not by preliminary trials."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1"
+      ],
+      [
+        "D1"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "twohop-01",
+    "family": "two-hop",
+    "question": "Which cipher is used for courier Vela's parcel?",
+    "answers": [
+      "Galdite",
+      "Hesper"
+    ],
+    "worlds": [
+      {
+        "D1": "The dispatch ledger routes courier Vela through Aldermere.",
+        "D2": "Every parcel routed through Aldermere uses the Galdite cipher.",
+        "D3": "Every parcel routed through Bramblecross uses the Hesper cipher.",
+        "D4": "Courier Vela carries sealed research parcels.",
+        "D5": "The Galdite and Hesper ciphers are incompatible."
+      },
+      {
+        "D1": "The dispatch ledger routes courier Vela through Bramblecross.",
+        "D2": "Every parcel routed through Aldermere uses the Galdite cipher.",
+        "D3": "Every parcel routed through Bramblecross uses the Hesper cipher.",
+        "D4": "Courier Vela carries sealed research parcels.",
+        "D5": "The Galdite and Hesper ciphers are incompatible."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "twohop-02",
+    "family": "two-hop",
+    "question": "Which cipher is used for courier Rook's parcel?",
+    "answers": [
+      "Ilyron",
+      "Jaspar"
+    ],
+    "worlds": [
+      {
+        "D1": "The dispatch ledger routes courier Rook through Cindervale.",
+        "D2": "Every parcel routed through Cindervale uses the Ilyron cipher.",
+        "D3": "Every parcel routed through Duskhaven uses the Jaspar cipher.",
+        "D4": "Courier Rook carries sealed research parcels.",
+        "D5": "The Ilyron and Jaspar ciphers are incompatible."
+      },
+      {
+        "D1": "The dispatch ledger routes courier Rook through Duskhaven.",
+        "D2": "Every parcel routed through Cindervale uses the Ilyron cipher.",
+        "D3": "Every parcel routed through Duskhaven uses the Jaspar cipher.",
+        "D4": "Courier Rook carries sealed research parcels.",
+        "D5": "The Ilyron and Jaspar ciphers are incompatible."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "twohop-03",
+    "family": "two-hop",
+    "question": "Which cipher is used for courier Sable's parcel?",
+    "answers": [
+      "Kelmite",
+      "Lunex"
+    ],
+    "worlds": [
+      {
+        "D1": "The dispatch ledger routes courier Sable through Emberfall.",
+        "D2": "Every parcel routed through Emberfall uses the Kelmite cipher.",
+        "D3": "Every parcel routed through Frostmere uses the Lunex cipher.",
+        "D4": "Courier Sable carries sealed research parcels.",
+        "D5": "The Kelmite and Lunex ciphers are incompatible."
+      },
+      {
+        "D1": "The dispatch ledger routes courier Sable through Frostmere.",
+        "D2": "Every parcel routed through Emberfall uses the Kelmite cipher.",
+        "D3": "Every parcel routed through Frostmere uses the Lunex cipher.",
+        "D4": "Courier Sable carries sealed research parcels.",
+        "D5": "The Kelmite and Lunex ciphers are incompatible."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "twohop-04",
+    "family": "two-hop",
+    "question": "Which cipher is used for courier Tern's parcel?",
+    "answers": [
+      "Mavrin",
+      "Norell"
+    ],
+    "worlds": [
+      {
+        "D1": "The dispatch ledger routes courier Tern through Glimmerbay.",
+        "D2": "Every parcel routed through Glimmerbay uses the Mavrin cipher.",
+        "D3": "Every parcel routed through Highfen uses the Norell cipher.",
+        "D4": "Courier Tern carries sealed research parcels.",
+        "D5": "The Mavrin and Norell ciphers are incompatible."
+      },
+      {
+        "D1": "The dispatch ledger routes courier Tern through Highfen.",
+        "D2": "Every parcel routed through Glimmerbay uses the Mavrin cipher.",
+        "D3": "Every parcel routed through Highfen uses the Norell cipher.",
+        "D4": "Courier Tern carries sealed research parcels.",
+        "D5": "The Mavrin and Norell ciphers are incompatible."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "twohop-05",
+    "family": "two-hop",
+    "question": "Which cipher is used for courier Wren's parcel?",
+    "answers": [
+      "Orphite",
+      "Praxen"
+    ],
+    "worlds": [
+      {
+        "D1": "The dispatch ledger routes courier Wren through Ivydell.",
+        "D2": "Every parcel routed through Ivydell uses the Orphite cipher.",
+        "D3": "Every parcel routed through Juniper Reach uses the Praxen cipher.",
+        "D4": "Courier Wren carries sealed research parcels.",
+        "D5": "The Orphite and Praxen ciphers are incompatible."
+      },
+      {
+        "D1": "The dispatch ledger routes courier Wren through Juniper Reach.",
+        "D2": "Every parcel routed through Ivydell uses the Orphite cipher.",
+        "D3": "Every parcel routed through Juniper Reach uses the Praxen cipher.",
+        "D4": "Courier Wren carries sealed research parcels.",
+        "D5": "The Orphite and Praxen ciphers are incompatible."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "twohop-06",
+    "family": "two-hop",
+    "question": "Which cipher is used for courier Yarrow's parcel?",
+    "answers": [
+      "Avenite",
+      "Borelite"
+    ],
+    "worlds": [
+      {
+        "D1": "The dispatch ledger routes courier Yarrow through Kestrel Point.",
+        "D2": "Every parcel routed through Kestrel Point uses the Avenite cipher.",
+        "D3": "Every parcel routed through Larkspur uses the Borelite cipher.",
+        "D4": "Courier Yarrow carries sealed research parcels.",
+        "D5": "The Avenite and Borelite ciphers are incompatible."
+      },
+      {
+        "D1": "The dispatch ledger routes courier Yarrow through Larkspur.",
+        "D2": "Every parcel routed through Kestrel Point uses the Avenite cipher.",
+        "D3": "Every parcel routed through Larkspur uses the Borelite cipher.",
+        "D4": "Courier Yarrow carries sealed research parcels.",
+        "D5": "The Avenite and Borelite ciphers are incompatible."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "twohop-07",
+    "family": "two-hop",
+    "question": "Which cipher is used for courier Zephyr's parcel?",
+    "answers": [
+      "Ceryx",
+      "Dovran"
+    ],
+    "worlds": [
+      {
+        "D1": "The dispatch ledger routes courier Zephyr through Moonridge.",
+        "D2": "Every parcel routed through Moonridge uses the Ceryx cipher.",
+        "D3": "Every parcel routed through Northbarrow uses the Dovran cipher.",
+        "D4": "Courier Zephyr carries sealed research parcels.",
+        "D5": "The Ceryx and Dovran ciphers are incompatible."
+      },
+      {
+        "D1": "The dispatch ledger routes courier Zephyr through Northbarrow.",
+        "D2": "Every parcel routed through Moonridge uses the Ceryx cipher.",
+        "D3": "Every parcel routed through Northbarrow uses the Dovran cipher.",
+        "D4": "Courier Zephyr carries sealed research parcels.",
+        "D5": "The Ceryx and Dovran ciphers are incompatible."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "twohop-08",
+    "family": "two-hop",
+    "question": "Which cipher is used for courier Kite's parcel?",
+    "answers": [
+      "Elnor",
+      "Fasmin"
+    ],
+    "worlds": [
+      {
+        "D1": "The dispatch ledger routes courier Kite through Oakstrand.",
+        "D2": "Every parcel routed through Oakstrand uses the Elnor cipher.",
+        "D3": "Every parcel routed through Pinewatch uses the Fasmin cipher.",
+        "D4": "Courier Kite carries sealed research parcels.",
+        "D5": "The Elnor and Fasmin ciphers are incompatible."
+      },
+      {
+        "D1": "The dispatch ledger routes courier Kite through Pinewatch.",
+        "D2": "Every parcel routed through Oakstrand uses the Elnor cipher.",
+        "D3": "Every parcel routed through Pinewatch uses the Fasmin cipher.",
+        "D4": "Courier Kite carries sealed research parcels.",
+        "D5": "The Elnor and Fasmin ciphers are incompatible."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "compare-01",
+    "family": "comparison",
+    "question": "Which station ranks first by verified output?",
+    "answers": [
+      "Aldermere",
+      "Bramblecross"
+    ],
+    "worlds": [
+      {
+        "D1": "The verified output of Aldermere is 47 teracycles.",
+        "D2": "The verified output of Bramblecross is 38 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Bramblecross at 31 teracycles."
+      },
+      {
+        "D1": "The verified output of Aldermere is 31 teracycles.",
+        "D2": "The verified output of Bramblecross is 38 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Bramblecross at 47 teracycles."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2",
+        "D3"
+      ],
+      [
+        "D1",
+        "D2",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "compare-02",
+    "family": "comparison",
+    "question": "Which station ranks first by verified output?",
+    "answers": [
+      "Cindervale",
+      "Duskhaven"
+    ],
+    "worlds": [
+      {
+        "D1": "The verified output of Cindervale is 50 teracycles.",
+        "D2": "The verified output of Duskhaven is 41 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Duskhaven at 34 teracycles."
+      },
+      {
+        "D1": "The verified output of Cindervale is 34 teracycles.",
+        "D2": "The verified output of Duskhaven is 41 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Duskhaven at 50 teracycles."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2",
+        "D3"
+      ],
+      [
+        "D1",
+        "D2",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "compare-03",
+    "family": "comparison",
+    "question": "Which station ranks first by verified output?",
+    "answers": [
+      "Emberfall",
+      "Frostmere"
+    ],
+    "worlds": [
+      {
+        "D1": "The verified output of Emberfall is 53 teracycles.",
+        "D2": "The verified output of Frostmere is 44 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Frostmere at 37 teracycles."
+      },
+      {
+        "D1": "The verified output of Emberfall is 37 teracycles.",
+        "D2": "The verified output of Frostmere is 44 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Frostmere at 53 teracycles."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2",
+        "D3"
+      ],
+      [
+        "D1",
+        "D2",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "compare-04",
+    "family": "comparison",
+    "question": "Which station ranks first by verified output?",
+    "answers": [
+      "Glimmerbay",
+      "Highfen"
+    ],
+    "worlds": [
+      {
+        "D1": "The verified output of Glimmerbay is 56 teracycles.",
+        "D2": "The verified output of Highfen is 47 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Highfen at 40 teracycles."
+      },
+      {
+        "D1": "The verified output of Glimmerbay is 40 teracycles.",
+        "D2": "The verified output of Highfen is 47 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Highfen at 56 teracycles."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2",
+        "D3"
+      ],
+      [
+        "D1",
+        "D2",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "compare-05",
+    "family": "comparison",
+    "question": "Which station ranks first by verified output?",
+    "answers": [
+      "Ivydell",
+      "Juniper Reach"
+    ],
+    "worlds": [
+      {
+        "D1": "The verified output of Ivydell is 59 teracycles.",
+        "D2": "The verified output of Juniper Reach is 50 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Juniper Reach at 43 teracycles."
+      },
+      {
+        "D1": "The verified output of Ivydell is 43 teracycles.",
+        "D2": "The verified output of Juniper Reach is 50 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Juniper Reach at 59 teracycles."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2",
+        "D3"
+      ],
+      [
+        "D1",
+        "D2",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "compare-06",
+    "family": "comparison",
+    "question": "Which station ranks first by verified output?",
+    "answers": [
+      "Kestrel Point",
+      "Larkspur"
+    ],
+    "worlds": [
+      {
+        "D1": "The verified output of Kestrel Point is 62 teracycles.",
+        "D2": "The verified output of Larkspur is 53 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Larkspur at 46 teracycles."
+      },
+      {
+        "D1": "The verified output of Kestrel Point is 46 teracycles.",
+        "D2": "The verified output of Larkspur is 53 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Larkspur at 62 teracycles."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2",
+        "D3"
+      ],
+      [
+        "D1",
+        "D2",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "compare-07",
+    "family": "comparison",
+    "question": "Which station ranks first by verified output?",
+    "answers": [
+      "Moonridge",
+      "Northbarrow"
+    ],
+    "worlds": [
+      {
+        "D1": "The verified output of Moonridge is 65 teracycles.",
+        "D2": "The verified output of Northbarrow is 56 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Northbarrow at 49 teracycles."
+      },
+      {
+        "D1": "The verified output of Moonridge is 49 teracycles.",
+        "D2": "The verified output of Northbarrow is 56 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Northbarrow at 65 teracycles."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2",
+        "D3"
+      ],
+      [
+        "D1",
+        "D2",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "compare-08",
+    "family": "comparison",
+    "question": "Which station ranks first by verified output?",
+    "answers": [
+      "Oakstrand",
+      "Pinewatch"
+    ],
+    "worlds": [
+      {
+        "D1": "The verified output of Oakstrand is 68 teracycles.",
+        "D2": "The verified output of Pinewatch is 59 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Pinewatch at 52 teracycles."
+      },
+      {
+        "D1": "The verified output of Oakstrand is 52 teracycles.",
+        "D2": "The verified output of Pinewatch is 59 teracycles.",
+        "D3": "The station with the larger verified output ranks first.",
+        "D4": "An obsolete estimate placed Pinewatch at 68 teracycles."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2",
+        "D3"
+      ],
+      [
+        "D1",
+        "D2",
+        "D3"
+      ]
+    ],
+    "ablate": [
+      "D1"
+    ]
+  },
+  {
+    "id": "conditional-01",
+    "family": "conditional",
+    "question": "Which protocol does Policy K-1 currently require at Emberfall?",
+    "answers": [
+      "Kelmite",
+      "Lunex"
+    ],
+    "worlds": [
+      {
+        "D1": "Policy K-1 requires protocol Kelmite when the stability index is above 50; otherwise it requires protocol Lunex.",
+        "D2": "The current stability index at Emberfall is 56.",
+        "D3": "Both Kelmite and Lunex remain available at Emberfall.",
+        "D4": "Availability does not determine which protocol policy requires."
+      },
+      {
+        "D1": "Policy K-1 requires protocol Kelmite when the stability index is above 50; otherwise it requires protocol Lunex.",
+        "D2": "The current stability index at Emberfall is 44.",
+        "D3": "Both Kelmite and Lunex remain available at Emberfall.",
+        "D4": "Availability does not determine which protocol policy requires."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D2"
+      ]
+    ],
+    "ablate": [
+      "D2"
+    ]
+  },
+  {
+    "id": "conditional-02",
+    "family": "conditional",
+    "question": "Which protocol does Policy K-2 currently require at Glimmerbay?",
+    "answers": [
+      "Mavrin",
+      "Norell"
+    ],
+    "worlds": [
+      {
+        "D1": "Policy K-2 requires protocol Mavrin when the stability index is above 51; otherwise it requires protocol Norell.",
+        "D2": "The current stability index at Glimmerbay is 57.",
+        "D3": "Both Mavrin and Norell remain available at Glimmerbay.",
+        "D4": "Availability does not determine which protocol policy requires."
+      },
+      {
+        "D1": "Policy K-2 requires protocol Mavrin when the stability index is above 51; otherwise it requires protocol Norell.",
+        "D2": "The current stability index at Glimmerbay is 45.",
+        "D3": "Both Mavrin and Norell remain available at Glimmerbay.",
+        "D4": "Availability does not determine which protocol policy requires."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D2"
+      ]
+    ],
+    "ablate": [
+      "D2"
+    ]
+  },
+  {
+    "id": "conditional-03",
+    "family": "conditional",
+    "question": "Which protocol does Policy K-3 currently require at Ivydell?",
+    "answers": [
+      "Orphite",
+      "Praxen"
+    ],
+    "worlds": [
+      {
+        "D1": "Policy K-3 requires protocol Orphite when the stability index is above 52; otherwise it requires protocol Praxen.",
+        "D2": "The current stability index at Ivydell is 58.",
+        "D3": "Both Orphite and Praxen remain available at Ivydell.",
+        "D4": "Availability does not determine which protocol policy requires."
+      },
+      {
+        "D1": "Policy K-3 requires protocol Orphite when the stability index is above 52; otherwise it requires protocol Praxen.",
+        "D2": "The current stability index at Ivydell is 46.",
+        "D3": "Both Orphite and Praxen remain available at Ivydell.",
+        "D4": "Availability does not determine which protocol policy requires."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D2"
+      ]
+    ],
+    "ablate": [
+      "D2"
+    ]
+  },
+  {
+    "id": "conditional-04",
+    "family": "conditional",
+    "question": "Which protocol does Policy K-4 currently require at Kestrel Point?",
+    "answers": [
+      "Avenite",
+      "Borelite"
+    ],
+    "worlds": [
+      {
+        "D1": "Policy K-4 requires protocol Avenite when the stability index is above 53; otherwise it requires protocol Borelite.",
+        "D2": "The current stability index at Kestrel Point is 59.",
+        "D3": "Both Avenite and Borelite remain available at Kestrel Point.",
+        "D4": "Availability does not determine which protocol policy requires."
+      },
+      {
+        "D1": "Policy K-4 requires protocol Avenite when the stability index is above 53; otherwise it requires protocol Borelite.",
+        "D2": "The current stability index at Kestrel Point is 47.",
+        "D3": "Both Avenite and Borelite remain available at Kestrel Point.",
+        "D4": "Availability does not determine which protocol policy requires."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D2"
+      ]
+    ],
+    "ablate": [
+      "D2"
+    ]
+  },
+  {
+    "id": "conditional-05",
+    "family": "conditional",
+    "question": "Which protocol does Policy K-5 currently require at Moonridge?",
+    "answers": [
+      "Ceryx",
+      "Dovran"
+    ],
+    "worlds": [
+      {
+        "D1": "Policy K-5 requires protocol Ceryx when the stability index is above 54; otherwise it requires protocol Dovran.",
+        "D2": "The current stability index at Moonridge is 60.",
+        "D3": "Both Ceryx and Dovran remain available at Moonridge.",
+        "D4": "Availability does not determine which protocol policy requires."
+      },
+      {
+        "D1": "Policy K-5 requires protocol Ceryx when the stability index is above 54; otherwise it requires protocol Dovran.",
+        "D2": "The current stability index at Moonridge is 48.",
+        "D3": "Both Ceryx and Dovran remain available at Moonridge.",
+        "D4": "Availability does not determine which protocol policy requires."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D2"
+      ]
+    ],
+    "ablate": [
+      "D2"
+    ]
+  },
+  {
+    "id": "conditional-06",
+    "family": "conditional",
+    "question": "Which protocol does Policy K-6 currently require at Oakstrand?",
+    "answers": [
+      "Elnor",
+      "Fasmin"
+    ],
+    "worlds": [
+      {
+        "D1": "Policy K-6 requires protocol Elnor when the stability index is above 55; otherwise it requires protocol Fasmin.",
+        "D2": "The current stability index at Oakstrand is 61.",
+        "D3": "Both Elnor and Fasmin remain available at Oakstrand.",
+        "D4": "Availability does not determine which protocol policy requires."
+      },
+      {
+        "D1": "Policy K-6 requires protocol Elnor when the stability index is above 55; otherwise it requires protocol Fasmin.",
+        "D2": "The current stability index at Oakstrand is 49.",
+        "D3": "Both Elnor and Fasmin remain available at Oakstrand.",
+        "D4": "Availability does not determine which protocol policy requires."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D2"
+      ]
+    ],
+    "ablate": [
+      "D2"
+    ]
+  },
+  {
+    "id": "conditional-07",
+    "family": "conditional",
+    "question": "Which protocol does Policy K-7 currently require at Aldermere?",
+    "answers": [
+      "Galdite",
+      "Hesper"
+    ],
+    "worlds": [
+      {
+        "D1": "Policy K-7 requires protocol Galdite when the stability index is above 56; otherwise it requires protocol Hesper.",
+        "D2": "The current stability index at Aldermere is 62.",
+        "D3": "Both Galdite and Hesper remain available at Aldermere.",
+        "D4": "Availability does not determine which protocol policy requires."
+      },
+      {
+        "D1": "Policy K-7 requires protocol Galdite when the stability index is above 56; otherwise it requires protocol Hesper.",
+        "D2": "The current stability index at Aldermere is 50.",
+        "D3": "Both Galdite and Hesper remain available at Aldermere.",
+        "D4": "Availability does not determine which protocol policy requires."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D2"
+      ]
+    ],
+    "ablate": [
+      "D2"
+    ]
+  },
+  {
+    "id": "conditional-08",
+    "family": "conditional",
+    "question": "Which protocol does Policy K-8 currently require at Cindervale?",
+    "answers": [
+      "Ilyron",
+      "Jaspar"
+    ],
+    "worlds": [
+      {
+        "D1": "Policy K-8 requires protocol Ilyron when the stability index is above 57; otherwise it requires protocol Jaspar.",
+        "D2": "The current stability index at Cindervale is 63.",
+        "D3": "Both Ilyron and Jaspar remain available at Cindervale.",
+        "D4": "Availability does not determine which protocol policy requires."
+      },
+      {
+        "D1": "Policy K-8 requires protocol Ilyron when the stability index is above 57; otherwise it requires protocol Jaspar.",
+        "D2": "The current stability index at Cindervale is 51.",
+        "D3": "Both Ilyron and Jaspar remain available at Cindervale.",
+        "D4": "Availability does not determine which protocol policy requires."
+      }
+    ],
+    "gold_citations": [
+      [
+        "D1",
+        "D2"
+      ],
+      [
+        "D1",
+        "D2"
+      ]
+    ],
+    "ablate": [
+      "D2"
+    ]
+  }
+]

@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this research artifact, please cite the accompanying manuscript."
+title: "Causal Evidence Audit reproducibility artifact"
+type: software
+authors:
+  - given-names: "Sergio Luiz"
+    family-names: "Wermuth Figueras"
+version: 0.1.0
+date-released: 2026-09-11
+preferred-citation:
+  type: article
+  title: "Beyond Citation Entailment: Causal Evidence Audits for Retrieval-Augmented Language Models"
+  authors:
+    - given-names: "Sergio Luiz"
+      family-names: "Wermuth Figueras"
+  year: 2026

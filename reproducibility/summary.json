@@ -1,0 +1,338 @@
+[
+  {
+    "model": "qwen3-4b",
+    "regime": "baseline",
+    "metrics": {
+      "world0_accuracy": {
+        "rate": 0.875,
+        "count": 28,
+        "n": 32,
+        "wilson95": [
+          0.7193135021517204,
+          0.950299461555257
+        ]
+      },
+      "world1_accuracy": {
+        "rate": 1.0,
+        "count": 32,
+        "n": 32,
+        "wilson95": [
+          0.8928172849426366,
+          1.0
+        ]
+      },
+      "paired_responsiveness": {
+        "rate": 0.875,
+        "count": 28,
+        "n": 32,
+        "wilson95": [
+          0.7193135021517204,
+          0.950299461555257
+        ]
+      },
+      "ablation_abstention": {
+        "rate": 0.3125,
+        "count": 10,
+        "n": 32,
+        "wilson95": [
+          0.17952352116618736,
+          0.4856699969803239
+        ]
+      },
+      "observational_support": {
+        "rate": 0.75,
+        "count": 24,
+        "n": 32,
+        "wilson95": [
+          0.5789310822975338,
+          0.8674775601737845
+        ]
+      },
+      "coverage_causal_evidence_score": {
+        "rate": 0.3125,
+        "count": 10,
+        "n": 32,
+        "wilson95": [
+          0.17952352116618736,
+          0.4856699969803239
+        ]
+      },
+      "causal_evidence_score": {
+        "rate": 0.3125,
+        "count": 10,
+        "n": 32,
+        "wilson95": [
+          0.17952352116618736,
+          0.4856699969803239
+        ]
+      },
+      "format_validity": {
+        "rate": 1.0,
+        "count": 32,
+        "n": 32,
+        "wilson95": [
+          0.8928172849426366,
+          1.0
+        ]
+      }
+    },
+    "causal_evidence_score_by_family": {
+      "direct": 1.0,
+      "two-hop": 0.0,
+      "comparison": 0.0,
+      "conditional": 0.25
+    }
+  },
+  {
+    "model": "qwen3-4b",
+    "regime": "evidence_contract",
+    "metrics": {
+      "world0_accuracy": {
+        "rate": 0.875,
+        "count": 28,
+        "n": 32,
+        "wilson95": [
+          0.7193135021517204,
+          0.950299461555257
+        ]
+      },
+      "world1_accuracy": {
+        "rate": 1.0,
+        "count": 32,
+        "n": 32,
+        "wilson95": [
+          0.8928172849426366,
+          1.0
+        ]
+      },
+      "paired_responsiveness": {
+        "rate": 0.875,
+        "count": 28,
+        "n": 32,
+        "wilson95": [
+          0.7193135021517204,
+          0.950299461555257
+        ]
+      },
+      "ablation_abstention": {
+        "rate": 0.09375,
+        "count": 3,
+        "n": 32,
+        "wilson95": [
+          0.032400962626319516,
+          0.24218499335778831
+        ]
+      },
+      "observational_support": {
+        "rate": 0.78125,
+        "count": 25,
+        "n": 32,
+        "wilson95": [
+          0.6124466920955516,
+          0.8897630306846815
+        ]
+      },
+      "coverage_causal_evidence_score": {
+        "rate": 0.09375,
+        "count": 3,
+        "n": 32,
+        "wilson95": [
+          0.032400962626319516,
+          0.24218499335778831
+        ]
+      },
+      "causal_evidence_score": {
+        "rate": 0.0,
+        "count": 0,
+        "n": 32,
+        "wilson95": [
+          0.0,
+          0.1071827150573635
+        ]
+      },
+      "format_validity": {
+        "rate": 0.71875,
+        "count": 23,
+        "n": 32,
+        "wilson95": [
+          0.546251630618882,
+          0.8443559315435214
+        ]
+      }
+    },
+    "causal_evidence_score_by_family": {
+      "direct": 0.0,
+      "two-hop": 0.0,
+      "comparison": 0.0,
+      "conditional": 0.0
+    }
+  },
+  {
+    "model": "llama3.2-3b",
+    "regime": "baseline",
+    "metrics": {
+      "world0_accuracy": {
+        "rate": 0.9375,
+        "count": 30,
+        "n": 32,
+        "wilson95": [
+          0.7985253275199642,
+          0.9826897968048427
+        ]
+      },
+      "world1_accuracy": {
+        "rate": 0.9375,
+        "count": 30,
+        "n": 32,
+        "wilson95": [
+          0.7985253275199642,
+          0.9826897968048427
+        ]
+      },
+      "paired_responsiveness": {
+        "rate": 0.875,
+        "count": 28,
+        "n": 32,
+        "wilson95": [
+          0.7193135021517204,
+          0.950299461555257
+        ]
+      },
+      "ablation_abstention": {
+        "rate": 0.0,
+        "count": 0,
+        "n": 32,
+        "wilson95": [
+          0.0,
+          0.1071827150573635
+        ]
+      },
+      "observational_support": {
+        "rate": 0.59375,
+        "count": 19,
+        "n": 32,
+        "wilson95": [
+          0.4225972657298823,
+          0.744805975196862
+        ]
+      },
+      "coverage_causal_evidence_score": {
+        "rate": 0.0,
+        "count": 0,
+        "n": 32,
+        "wilson95": [
+          0.0,
+          0.1071827150573635
+        ]
+      },
+      "causal_evidence_score": {
+        "rate": 0.0,
+        "count": 0,
+        "n": 32,
+        "wilson95": [
+          0.0,
+          0.1071827150573635
+        ]
+      },
+      "format_validity": {
+        "rate": 1.0,
+        "count": 32,
+        "n": 32,
+        "wilson95": [
+          0.8928172849426366,
+          1.0
+        ]
+      }
+    },
+    "causal_evidence_score_by_family": {
+      "direct": 0.0,
+      "two-hop": 0.0,
+      "comparison": 0.0,
+      "conditional": 0.0
+    }
+  },
+  {
+    "model": "llama3.2-3b",
+    "regime": "evidence_contract",
+    "metrics": {
+      "world0_accuracy": {
+        "rate": 0.90625,
+        "count": 29,
+        "n": 32,
+        "wilson95": [
+          0.7578150066422116,
+          0.9675990373736805
+        ]
+      },
+      "world1_accuracy": {
+        "rate": 0.90625,
+        "count": 29,
+        "n": 32,
+        "wilson95": [
+          0.7578150066422116,
+          0.9675990373736805
+        ]
+      },
+      "paired_responsiveness": {
+        "rate": 0.8125,
+        "count": 26,
+        "n": 32,
+        "wilson95": [
+          0.6469050424507756,
+          0.9111057606383721
+        ]
+      },
+      "ablation_abstention": {
+        "rate": 0.21875,
+        "count": 7,
+        "n": 32,
+        "wilson95": [
+          0.11023696931531854,
+          0.3875533079044484
+        ]
+      },
+      "observational_support": {
+        "rate": 0.71875,
+        "count": 23,
+        "n": 32,
+        "wilson95": [
+          0.546251630618882,
+          0.8443559315435214
+        ]
+      },
+      "coverage_causal_evidence_score": {
+        "rate": 0.0625,
+        "count": 2,
+        "n": 32,
+        "wilson95": [
+          0.017310203195157234,
+          0.2014746724800358
+        ]
+      },
+      "causal_evidence_score": {
+        "rate": 0.0,
+        "count": 0,
+        "n": 32,
+        "wilson95": [
+          0.0,
+          0.1071827150573635
+        ]
+      },
+      "format_validity": {
+        "rate": 1.0,
+        "count": 32,
+        "n": 32,
+        "wilson95": [
+          0.8928172849426366,
+          1.0
+        ]
+      }
+    },
+    "causal_evidence_score_by_family": {
+      "direct": 0.0,
+      "two-hop": 0.0,
+      "comparison": 0.0,
+      "conditional": 0.0
+    }
+  }
+]
