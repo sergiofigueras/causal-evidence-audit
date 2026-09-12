@@ -1,27 +1,41 @@
 # Beyond Citation Entailment
 
-This bundle contains the LaTeX manuscript and the complete reproducibility artifact for the 32-item pilot.
+[![validate](https://github.com/sergiofigueras/causal-evidence-audit/actions/workflows/validate.yml/badge.svg)](https://github.com/sergiofigueras/causal-evidence-audit/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Public source-code repository: <https://github.com/sergiofigueras/causal-evidence-audit>
+This repository contains the LaTeX manuscript and complete reproducibility artifact for the 32-item Causal Evidence Audit pilot.
+
+- Public source-code repository: <https://github.com/sergiofigueras/causal-evidence-audit>
+- Immutable release: <https://github.com/sergiofigueras/causal-evidence-audit/releases/tag/v0.1.0>
 
 ## Contents
 
 - `main.tex` — complete paper source.
-- `references.bib` — BibTeX bibliography with direct arXiv URLs.
+- `references.bib` — BibTeX bibliography with direct source URLs.
 - `main.pdf` — compiled verification copy.
-- `reproducibility/run_causal_grounding_pilot.py` — benchmark generator, local inference runner, parser, and scorer.
-- `reproducibility/benchmark.json` — the exact 32-item paired-world benchmark used in the paper.
+- `reproducibility/causal_audit_core.py` — standard-library benchmark, parser, scorer, and metric implementation.
+- `reproducibility/run_causal_grounding_pilot.py` — local MLX inference runner and provenance-manifest writer.
+- `reproducibility/benchmark.json` — exact 32-item paired-world benchmark used in the paper.
 - `reproducibility/qwen3-4b_responses.jsonl` — 192 raw Qwen generations.
 - `reproducibility/llama3.2-3b_responses.jsonl` — 192 raw Llama generations.
 - `reproducibility/summary.json` — combined machine-readable metrics and Wilson intervals.
-- `reproducibility/validate_artifacts.py` — standard-library integrity checks for the committed artifacts.
-- `requirements.txt` — pinned Python environment used by the pilot.
-- `Makefile` — convenience commands for setup, compilation, validation, and reproduction.
-- `CITATION.cff` — local citation metadata for the manuscript and artifact.
+- `reproducibility/run_manifest.json` — runtime, model revision, decoder, source, and artifact hashes.
+- `reproducibility/validate_artifacts.py` — deep integrity validation and reproduction comparison.
+- `reproducibility/validate_manuscript.py` — citation and publication-metadata checks.
+- `requirements.in` — direct runtime dependencies.
+- `requirements.txt` — fully resolved, hash-locked Python environment.
+- `Makefile` — setup, compilation, validation, reproduction, and comparison commands.
+- `CITATION.cff` — citation metadata for the manuscript and artifact.
+
+## Validate the committed artifact
+
+Validation uses only the Python standard library. It regenerates the benchmark, reparses all 384 raw outputs, recomputes every stored score and summary, verifies source and artifact checksums, and checks the manuscript's citation keys and publication links.
+
+```bash
+make validate
+```
 
 ## Build the paper
-
-From this directory, run:
 
 ```bash
 tectonic main.tex
@@ -31,27 +45,32 @@ The source also works with a conventional LaTeX/BibTeX toolchain supporting the 
 
 ## Reproduce the pilot
 
-The experiment requires an Apple Silicon Mac and downloads approximately 4 GB of model weights.
+The hash-locked experiment environment requires an Apple Silicon Mac, Python 3.12 or newer, and approximately 4 GB for model weights. On this Mac, `/usr/bin/python3` is too old; the example below selects the current Homebrew Python explicitly.
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-make reproduce
+PYTHON=/opt/homebrew/bin/python3 make setup
+make reproduce-and-validate
 ```
 
-Run `make validate` to check the committed benchmark, raw generations, summaries, and Python syntax without downloading model weights. The two complete prompt regimes are the `REGIMES` constants in `reproducibility/run_causal_grounding_pilot.py`. Model repository IDs and immutable revisions are recorded in its `MODELS` constant and passed directly to MLX-LM.
+`make setup` rebuilds `.venv` so an older local interpreter cannot leak into the locked environment. `make reproduce` creates the same per-model file layout as the committed artifact. `make validate-reproduced` deeply validates the new run. `make compare` requires an identical benchmark and identical aggregate metrics, then reports any raw-text or parsed-field differences instead of assuming byte-level determinism.
 
-Greedy decoding is deterministic for a fixed software and model snapshot, but changes in kernels, chat templates, or repository revisions can still alter exact outputs.
+The two complete prompt regimes and immutable model revisions are recorded in `reproducibility/causal_audit_core.py`. Generation uses greedy decoding at temperature zero. Greedy decoding removes sampling randomness but does not guarantee byte-identical output across changes in kernels, runtimes, chat templates, or hardware.
 
-## Recorded environment
+## Recorded release environment
 
-- Date: 2026-09-11
+- Date: 2026-09-12
 - macOS 26.5.2
 - Apple M4 Pro, 14 CPU cores, 48 GB unified memory
-- Python 3.9.6
-- MLX-LM 0.29.1
-- MLX 0.29.3
-- Transformers 4.57.6
-- NumPy 2.0.2
+- Python 3.14.6
+- MLX-LM 0.31.3
+- MLX 0.32.2
+- Transformers 5.17.0
+- NumPy 2.5.3
 - `mlx-community/Qwen3-4B-4bit`, revision `4dcb3d101c2a062e5c1d4bb173588c54ea6c4d25`
 - `mlx-community/Llama-3.2-3B-Instruct-4bit`, revision `7f0dc925e0d0afb0322d96f9255cfddf2ba5636e`
+
+The hash-locked dependency set had no known vulnerabilities in a `pip-audit` check performed on 2026-09-12. This is a dated observation, not a guarantee about future disclosures; Dependabot is configured for ongoing monitoring.
+
+## License
+
+The repository is released under the [MIT License](LICENSE). Third-party model weights are not redistributed and remain subject to their own licenses.

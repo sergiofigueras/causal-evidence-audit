@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-09-12T11:58:11.624100+00:00",
+  "command": [
+    "reproducibility/run_causal_grounding_pilot.py",
+    "--models",
+    "qwen3-4b",
+    "llama3.2-3b",
+    "--n-per-family",
+    "8",
+    "--output-dir",
+    "work/release-results"
+  ],
+  "python": "3.14.6",
+  "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "packages": {
+    "mlx": "0.32.2",
+    "mlx-lm": "0.31.3",
+    "numpy": "2.5.3",
+    "huggingface-hub": "1.31.0",
+    "transformers": "5.17.0",
+    "tokenizers": "0.23.2",
+    "safetensors": "0.8.0",
+    "sentencepiece": "0.2.2",
+    "protobuf": "7.36.1"
+  },
+  "models": {
+    "qwen3-4b": {
+      "repo": "mlx-community/Qwen3-4B-4bit",
+      "revision": "4dcb3d101c2a062e5c1d4bb173588c54ea6c4d25"
+    },
+    "llama3.2-3b": {
+      "repo": "mlx-community/Llama-3.2-3B-Instruct-4bit",
+      "revision": "7f0dc925e0d0afb0322d96f9255cfddf2ba5636e"
+    }
+  },
+  "regimes": [
+    "baseline",
+    "evidence_contract"
+  ],
+  "conditions": [
+    "world0",
+    "world1",
+    "ablated"
+  ],
+  "n_per_family": 8,
+  "generation_count": 384,
+  "decoder": {
+    "strategy": "greedy",
+    "temperature": 0.0,
+    "max_tokens": 96
+  },
+  "source_sha256": {
+    "causal_audit_core.py": "88293d9ffec725c01d7d750e1981cb094ef403c2414626df2aeb1bfa9e4a63cb",
+    "run_causal_grounding_pilot.py": "4aa34246a00988daec69df7a5cf22597f63a6e9f5daa3de70be30434e4e91576"
+  },
+  "artifact_sha256": {
+    "benchmark.json": "448b4a77e167d635e0d72341e855d25cf49dbee1138ce8a70d55f3edad4f3cd9",
+    "qwen3-4b_responses.jsonl": "16b38098050d17722065a9dd3674441c2c2c8b622f140e8c4c878957a6693e2f",
+    "llama3.2-3b_responses.jsonl": "381365f7d00957db5869dce3570d8de40e3c522a2f0308f582e9acc34d0012f3",
+    "summary.json": "cf53422dd47c5d82435ab6cc7f394d3ac691cf9115f09cd440e6f1d20ed83445"
+  }
+}

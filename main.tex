@@ -33,7 +33,7 @@
 \maketitle
 
 \begin{abstract}
-Retrieval-augmented language models and deep-research agents are commonly evaluated by answer correctness and by whether cited passages support generated claims. These observations establish compatibility between an answer and its citations, but they do not establish that the cited evidence determined the answer. A system can answer from parametric memory, a positional shortcut, or a prior draft and attach an entailing citation afterward. We introduce the \emph{Causal Evidence Audit} (\method), a black-box evaluation protocol that complements citation entailment with three controlled tests: paired-world responsiveness when one decisive fact changes, abstention when indispensable evidence is removed, and proof-chain citation coverage. We show constructively that causal grounding is not identifiable from any single-world observational citation score. We then instantiate the protocol in \dataset, a transparent pilot of 32 fictional-entity items spanning direct lookup, two-hop composition, numerical comparison, and conditional reasoning. Two locally executed open-weight models, each tested with ordinary and evidence-contract prompts, produced 384 deterministic generations. Single-world observational pass rates ranged from 59.4\% to 78.1\%, whereas the coverage-based joint causal score ranged from 0\% to 31.3\%; the strict score, which also rejects extraneous citations, ranged from 0\% to 31.3\%. Stronger grounding instructions sometimes increased the observational score while decreasing the strict causal score. These pilot results are not a model leaderboard. They demonstrate that commonly reported citation success can conceal unsupported guessing and post-hoc attribution, and motivate paired evidence interventions as a minimum evaluation layer for high-stakes RAG and research agents.
+Retrieval-augmented language models and deep-research agents are commonly evaluated by answer correctness and by whether cited passages support generated claims. These observations establish compatibility between an answer and its citations, but they do not establish that the cited evidence determined the answer. A system can answer from parametric memory, a positional shortcut, or a prior draft and attach an entailing citation afterward. We introduce the \emph{Causal Evidence Audit} (\method), a black-box evaluation protocol that complements citation entailment with three controlled tests: paired-world responsiveness when one decisive fact changes, abstention when indispensable evidence is removed, and proof-chain citation coverage. We show constructively that causal grounding is not identifiable from any single-world observational citation score. We then instantiate the protocol in \dataset, a transparent pilot of 32 fictional-entity items spanning direct lookup, two-hop composition, numerical comparison, and conditional reasoning. Two locally executed open-weight models, each tested with ordinary and evidence-contract prompts, produced 384 greedy-decoded generations. Single-world observational pass rates ranged from 59.4\% to 78.1\%, whereas the coverage-based joint causal score ranged from 0\% to 31.3\%; the strict score, which also rejects extraneous citations, ranged from 0\% to 31.3\%. Stronger grounding instructions sometimes increased the observational score while decreasing the strict causal score. These pilot results are not a model leaderboard. They demonstrate that commonly reported citation success can conceal unsupported guessing and post-hoc attribution, and motivate paired evidence interventions as a minimum evaluation layer for high-stakes RAG and research agents.
 \end{abstract}
 
 \section{Introduction}
@@ -44,7 +44,7 @@ Evaluation has largely followed the visible artifact. Attributable to Identified
 
 They do not, by themselves, answer a different question: \emph{did the system's answer depend on the evidence it cites?} An entailing citation can be attached after an answer has already been produced. A model may ignore a decisive passage, follow a familiar prior, select the first document, or guess under missing evidence while still producing a citation that looks appropriate. Recent work makes the distinction increasingly consequential. ContextCite and RAGONITE use context removal to estimate which evidence contributed to a generation \citep{cohenwang2024contextcite,saharoy2024ragonite}. Counterfactual prompting and set-level verification have been used for RAG risk control and selective abstention \citep{chen2024risk,qiu2026surerag}, while leave-one-out changes can reveal poisoned documents \citep{kumar2026raguard}. Deceptive Grounding shows that real citations and high measured faithfulness can coexist with entity-attribution failure \citep{caruzzo2026deceptive}. Work on knowledge conflicts further shows that models may integrate evidence unevenly or positionally \citep{xu2024knowledge,yang2026contextconflict}. Meanwhile, evaluations of deep-research agents identify evidence integration and dependency-consistent reasoning as persistent bottlenecks \citep{zhang2025finder,guo2026mrlhdr}.
 
-This paper argues that grounding evaluation needs both \emph{observational support} and \emph{interventional reliance}. We propose \method, a model-agnostic protocol built around matched evidence worlds. In a paired item, exactly one answer-determining proposition is changed while nuisance content is held fixed; a grounded system must change its answer accordingly. In a matched ablation, indispensable evidence is removed; a grounded system must abstain rather than complete the missing link from a shortcut. Citations are then checked against the oracle proof set in each world.
+This paper argues that grounding evaluation needs both \emph{observational support} and \emph{interventional reliance}. We propose \method, a model-agnostic protocol built around matched evidence worlds. In a paired item, exactly one answer-determining proposition is changed; nuisance content is either held fixed or modified by a predeclared, answer-invariant balancing edit. A grounded system must change its answer accordingly. In a matched ablation, indispensable evidence is removed; a grounded system must abstain rather than complete the missing link from a shortcut. Citations are then checked against the oracle proof set in each world.
 
 The contributions are:
 \begin{enumerate}[leftmargin=*,itemsep=2pt,topsep=3pt]
@@ -116,7 +116,7 @@ For each base item, an audit author specifies a query $q$, two evidence worlds $
 \begin{equation}
  E^{(1)}=T(E^{(0)}), \qquad y^{(1)}\neq y^{(0)}.
 \end{equation}
-All non-causal features that can feasibly be controlled---document count, style, entity frequency, answer mention frequency, and ordering---should remain fixed.
+All non-causal features that can feasibly be controlled---document count, style, entity frequency, answer mention frequency, and ordering---should remain fixed or be explicitly balanced by an answer-invariant edit whose role is documented.
 
 The audit also constructs an ablated world $E^{(-)}$ by removing an indispensable proof element from $E^{(0)}$. The oracle answer is then $\botans$. An optional nuisance intervention $P$ permutes irrelevant documents or changes non-semantic metadata while preserving the oracle answer. This fourth condition tests selective invariance, but it was not included in the pilot.
 
@@ -165,18 +165,21 @@ For $w\in\{0,1\}$,
  \mathrm{PCR}_i^{(w)} &= \frac{|C_i^{(w)}\cap G_i^{(w)}|}{|G_i^{(w)}|},\\
  \mathrm{PCP}_i^{(w)} &= \frac{|C_i^{(w)}\cap G_i^{(w)}|}{|C_i^{(w)}|},
 \end{align}
-with PCP defined as zero for an empty citation set when $G$ is nonempty. PCR asks whether every necessary proof document is cited; PCP penalizes extraneous citations. Span-level proof sets should be preferred when reliable annotations are available.
+with PCP defined as zero for an empty citation set when $G$ is nonempty. PCR asks whether every necessary proof document is cited; PCP penalizes extraneous citations. Let $V_i^{(-)}$ indicate that every citation emitted in the ablated world names a document actually present in that world. Span-level proof sets should be preferred when reliable annotations are available.
 
 \paragraph{Joint scores.}
 The coverage-based score is a hard per-item pass:
 \begin{equation}
-\mathrm{CES}^{\mathrm{cov}}_i=\mathrm{CRC}_i\,\mathrm{ENA}_i
+\mathrm{CES}^{\mathrm{cov}}_i=\mathrm{CRC}_i\,\mathrm{ENA}_i\,V_i^{(-)}
 \prod_{w\in\{0,1\}}\ind[\mathrm{PCR}_i^{(w)}=1].
 \end{equation}
-The strict score additionally requires exact proof citations:
+The strict score additionally requires exact proof citations in both full worlds and no proof citation after abstention:
 \begin{equation}
-\mathrm{CES}^{\mathrm{strict}}_i=\mathrm{CRC}_i\,\mathrm{ENA}_i
-\prod_{w\in\{0,1\}}\ind[C_i^{(w)}=G_i^{(w)}].
+\begin{aligned}
+\mathrm{CES}^{\mathrm{strict}}_i={}&\mathrm{CRC}_i\,\mathrm{ENA}_i\,V_i^{(-)}
+\ind[C_i^{(-)}=\varnothing]\\
+&\times\prod_{w\in\{0,1\}}\ind[C_i^{(w)}=G_i^{(w)}].
+\end{aligned}
 \end{equation}
 Dataset scores are macro-averages over items. The multiplicative construction is intentional: high answer accuracy cannot compensate for guessing when evidence is absent, and citation verbosity cannot compensate for omitting a necessary proof link.
 
@@ -219,7 +222,7 @@ The pilot addresses three narrow questions:
     \item \textbf{Numerical comparison:} two verified values and a ranking rule determine the higher-ranked fictional station.
     \item \textbf{Conditional reasoning:} a threshold policy and a site measurement determine a required protocol.
 \end{itemize}
-All entity and value names were constructed for the benchmark. This reduces the opportunity to answer from memorized world knowledge. For each item, world 1 changes one decisive sentence or number from world 0; all other documents are unchanged. The ablation removes the decisive document from world 0. Distractors include obsolete estimates, preliminary trials, availability statements, and non-diagnostic descriptions. The benchmark file records both worlds, expected answers, gold citation sets, and the ablation target.
+All entity and value names were constructed for the benchmark. This reduces the opportunity to answer from memorized world knowledge. For each item, world 1 changes one decisive sentence or number from world 0. In the direct, two-hop, and conditional families, all other documents are unchanged. In the comparison family, the explicitly obsolete value in D4 also swaps high and low tokens to preserve the numerical multiset across worlds; D4 is excluded from the oracle proof and does not affect the answer under the benchmark semantics. The ablation removes the decisive document from world 0. Distractors include obsolete estimates, preliminary trials, availability statements, and non-diagnostic descriptions. The benchmark file records both worlds, expected answers, gold citation sets, and the ablation target.
 
 \subsection{Models and prompting regimes}
 
@@ -227,10 +230,10 @@ We evaluated the 4-bit MLX conversions \texttt{mlx-community/Qwen3-4B-4bit} and 
 
 Each model was tested under two system prompts. The \emph{baseline} required use of numbered sources, abstention when sources were insufficient, and a JSON answer with citation IDs. The \emph{evidence contract} additionally required the model to identify internally the smallest complete proof chain, answer only when every necessary link was explicit, and cite every proof source without irrelevant citations. Full prompts appear in \cref{app:prompts}.
 
-The design comprises $32\times 3\times 2\times 2=384$ generations: 32 items, three evidence conditions, two models, and two regimes. Decoding was greedy (temperature zero) with a 96-token maximum. All inference was local through MLX; no external API was used. The execution host was a 14-core Apple M4 Pro with 48~GB memory, running macOS 26.5.2, MLX 0.29.3, and MLX-LM 0.29.1. The experiment script writes the generated benchmark, raw responses, and summary metrics.
+The design comprises $32\times 3\times 2\times 2=384$ generations: 32 items, three evidence conditions, two models, and two regimes. Decoding was greedy (temperature zero) with a 96-token maximum. All inference was local through MLX; no external API was used. The release run used Python 3.14.6 on a 14-core Apple M4 Pro with 48~GB memory, running macOS 26.5.2, MLX 0.32.2, MLX-LM 0.31.3, and Transformers 5.17.0. The experiment script writes the generated benchmark, per-model raw responses, summary metrics, and a machine-readable provenance manifest with source and artifact hashes.
 
 \paragraph{Code and artifacts.}
-The complete source code for the tests is available at \url{https://github.com/sergiofigueras/causal-evidence-audit}. The repository contains the benchmark generator, the realized 32-item benchmark, both system prompts, all 384 raw generations, machine-readable summaries, model identifiers and revisions, validation code, and execution instructions.
+The complete source code for the tests is available at \url{https://github.com/sergiofigueras/causal-evidence-audit}; the immutable artifact release is \url{https://github.com/sergiofigueras/causal-evidence-audit/releases/tag/v0.1.0}. The repository contains the benchmark generator, the realized 32-item benchmark, both system prompts, all 384 raw generations, machine-readable summaries, model identifiers and revisions, a hash-locked environment, validation code, and execution instructions.
 
 \subsection{Scoring and uncertainty}
 
@@ -244,14 +247,14 @@ We report Wilson 95\% confidence intervals for binary proportions. These interva
 \centering
 \small
 \setlength{\tabcolsep}{5.2pt}
-\caption{Pilot results on 32 items per model and prompt regime. W0/W1 are answer accuracy in the paired worlds; CRC is paired response consistency; ENA is evidence-necessity abstention; OBS is the single-world observational pass; CES$^{\mathrm{cov}}$ requires correct switching, ablation abstention, and complete proof citations in both worlds; CES$^{\mathrm{strict}}$ also rejects extraneous citations. Values are percentages.}
+\caption{Pilot results on 32 items per model and prompt regime. W0/W1 are answer accuracy in the paired worlds; CRC is paired response consistency; ENA is evidence-necessity abstention; OBS is the single-world observational pass; CES$^{\mathrm{cov}}$ requires correct switching, valid ablation citations, ablation abstention, and complete proof citations in both worlds; CES$^{\mathrm{strict}}$ also rejects extraneous full-world citations and any ablation citation. Values are percentages.}
 \label{tab:main}
 \begin{tabular}{llrrrrrrr}
 \toprule
 Model & Prompt & W0 & W1 & CRC & ENA & OBS & CES$^{\mathrm{cov}}$ & CES$^{\mathrm{strict}}$\\
 \midrule
 Qwen3-4B & Baseline & 87.5 & 100.0 & 87.5 & 31.3 & 75.0 & 31.3 & 31.3\\
-Qwen3-4B & Evidence contract & 87.5 & 100.0 & 87.5 & 9.4 & \textbf{78.1} & 9.4 & 0.0\\
+Qwen3-4B & Evidence contract & 87.5 & 100.0 & 87.5 & 6.3 & \textbf{78.1} & 6.3 & 0.0\\
 Llama-3.2-3B & Baseline & 93.8 & 93.8 & \textbf{87.5} & 0.0 & 59.4 & 0.0 & 0.0\\
 Llama-3.2-3B & Evidence contract & 90.6 & 90.6 & 81.3 & \textbf{21.9} & \textbf{71.9} & 6.3 & 0.0\\
 \bottomrule
@@ -272,9 +275,9 @@ Family-level strict scores sharpen the diagnosis. Under the Qwen baseline, direc
 
 \subsection{RQ3: stronger instructions do not guarantee causal grounding}
 
-The evidence-contract prompt increased OBS by 3.1 percentage points for Qwen and 12.5 points for Llama, but it did not reliably increase the joint scores. For Qwen, ENA fell from 31.3\% to 9.4\%, CES$^{\mathrm{cov}}$ fell by the same amount, and CES$^{\mathrm{strict}}$ fell to zero. For Llama, ENA improved from 0\% to 21.9\% and CES$^{\mathrm{cov}}$ reached 6.3\%, yet the strict score remained zero.
+The evidence-contract prompt increased OBS by 3.1 percentage points for Qwen and 12.5 points for Llama, but it did not reliably increase the joint scores. For Qwen, ENA fell from 31.3\% to 6.3\%, CES$^{\mathrm{cov}}$ fell by the same amount, and CES$^{\mathrm{strict}}$ fell to zero. For Llama, ENA improved from 0\% to 21.9\% and CES$^{\mathrm{cov}}$ reached 6.3\%, yet the strict score remained zero.
 
-The coverage--strict gap localizes over-citation. Three Qwen evidence-contract items and two Llama evidence-contract items satisfied correct switching, correct ablation abstention, and complete gold coverage; none cited exactly the proof set in both worlds. The evidence contract often elicited additional, non-necessary sources. An evaluation based only on whether all required citations were present would reward this verbosity, while strict proof alignment exposes it.
+The coverage--strict gap localizes over-citation. Two Qwen evidence-contract items and two Llama evidence-contract items satisfied correct switching, valid citations under ablation, correct ablation abstention, and complete gold coverage; none satisfied the stricter citation contract across all three conditions. The evidence contract often elicited additional, non-necessary sources. An evaluation based only on whether all required citations were present would reward this verbosity, while strict proof alignment exposes it.
 
 These prompt comparisons are exploratory. Greedy decoding, one prompt wording, small models, and 32 templates cannot establish a general effect of evidence contracts. They do demonstrate a practical reason to evaluate the target property directly: a prompt can improve the visible citation artifact without improving the intended evidence behavior.
 
@@ -335,12 +338,15 @@ The pilot's proofs are unambiguous by construction, but real documents admit alt
 \paragraph{Answer and abstention parsing.}
 The deterministic parser accepts fixed linguistic variants. It may misclassify unusual but reasonable responses. Human validation and preregistered semantic judges are needed for open-ended reports.
 
+\paragraph{Execution stability.}
+Temperature-zero greedy decoding removes sampling randomness but does not imply byte-level determinism across software, kernels, chat templates, or hardware. The release preserves raw outputs and a provenance manifest, and the comparison command distinguishes aggregate-metric reproduction from exact raw-text identity.
+
 \paragraph{Novelty boundary.}
 The protocol synthesizes ideas from citation evaluation, context attribution, counterfactual risk control, knowledge-conflict evaluation, and dependency-aware research benchmarks. Its contribution is the joint end-to-end contract and matched evaluation design, not the invention of input ablation or counterfactual testing in isolation.
 
 \section{Research Integrity and Ethical Use}
 
-All numerical claims in this manuscript are generated by the included script and preserved raw outputs. No human-subject data, private data, or external API calls were used. Fictional entities reduce privacy and memorization concerns. The paper and literature survey were prepared with AI assistance; the named author should independently verify citations, rerun the experiment, inspect raw outputs, and assume responsibility for every claim before submission. This draft has not been peer reviewed and should not be represented as accepted or independently validated research.
+All numerical claims in this manuscript are generated by the included script and preserved raw outputs. No human-subject data, private data, or external API calls were used. Fictional entities reduce privacy and memorization concerns. The paper and literature survey were prepared with AI assistance; responsibility for the claims, citations, released code, and artifacts remains with the named author. This preprint has not been peer reviewed and should not be represented as accepted or independently validated research.
 
 The method can improve safety by exposing unsupported completion, but it can also be misused to optimize systems narrowly against known intervention templates. Public benchmarks should therefore publish transparent development sets while maintaining structurally distinct held-out audits and periodic refreshes.
 
@@ -352,11 +358,11 @@ The \dataset{} pilot shows why this layer is useful. Configurations that passed 
 
 \section*{Data and Code Availability}
 
-The source code for the tests and the complete reproducibility artifact are publicly available at \url{https://github.com/sergiofigueras/causal-evidence-audit}. The repository contains the benchmark generator, the realized 32-item benchmark, all 384 raw generations, machine-readable summaries, model identifiers and revisions, prompts, validation code, and execution instructions. The artifact is designed to run locally on Apple Silicon through MLX.
+The source code for the tests and the complete reproducibility artifact are publicly available at \url{https://github.com/sergiofigueras/causal-evidence-audit}. Version 0.1.0 is preserved at \url{https://github.com/sergiofigueras/causal-evidence-audit/releases/tag/v0.1.0}. The repository contains the benchmark generator, the realized 32-item benchmark, all 384 raw generations, machine-readable summaries, model identifiers and revisions, prompts, a provenance manifest, a hash-locked environment, validation code, and execution instructions. The artifact is designed to run locally on Apple Silicon through MLX and is released under the MIT License.
 
 \section*{Acknowledgments}
 
-No external funding is declared. The author name and any affiliation, funding, or conflict-of-interest statements should be verified before public submission.
+No external funding is declared. No institutional affiliation is listed.
 
 \appendix
 \section{Prompt Templates}
@@ -398,7 +404,7 @@ Consider a fictional two-hop item. In world 0, D1 routes courier Vela through Al
 Model & Prompt & OBS & CES$^{\mathrm{cov}}$\\
 \midrule
 Qwen3 & Base & 57.9--86.7 & 18.0--48.6\\
-Qwen3 & Contract & 61.2--89.0 & 3.2--24.2\\
+Qwen3 & Contract & 61.2--89.0 & 1.7--20.2\\
 Llama & Base & 42.3--74.5 & 0.0--10.7\\
 Llama & Contract & 54.6--84.4 & 1.7--20.2\\
 \bottomrule
@@ -421,8 +427,8 @@ An evaluation using \method{} should report:
 \end{enumerate}
 
 \begingroup
-\footnotesize
-\setlength{\bibsep}{1pt}
+\scriptsize
+\setlength{\bibsep}{0pt}
 \bibliographystyle{plainnat}
 \bibliography{references}
 \endgroup
