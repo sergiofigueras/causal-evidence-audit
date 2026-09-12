@@ -7,6 +7,7 @@ authors:
     family-names: "Wermuth Figueras"
 version: 0.1.0
 date-released: 2026-09-11
+repository-code: "https://github.com/sergiofigueras/causal-evidence-audit"
 preferred-citation:
   type: article
   title: "Beyond Citation Entailment: Causal Evidence Audits for Retrieval-Augmented Language Models"

@@ -17,7 +17,6 @@
 \usepackage[nameinlink,capitalise]{cleveref}
 \usepackage{natbib}
 \usepackage{url}
-\usepackage{balance}
 
 \newtheorem{proposition}{Proposition}
 \newtheorem{definition}{Definition}
@@ -43,7 +42,7 @@ Retrieval-augmented generation (RAG) was introduced to combine parametric langua
 
 Evaluation has largely followed the visible artifact. Attributable to Identified Sources (AIS) asks whether generated statements are supported by identified sources \citep{rashkin2021ais}. Audits of generative search measure citation completeness and citation correctness \citep{liu2023verifiability}; ALCE evaluates fluency, answer correctness, and citation quality \citep{gao2023alce}. RAGAS, ARES, and RAGCHECKER decompose retrieval relevance, faithfulness, and answer quality in increasingly fine-grained ways \citep{es2023ragas,saadfalcon2023ares,ru2024ragchecker}. These are necessary measurements. They answer whether the output is consistent with the presented evidence and whether a reader can verify it.
 
-They do not, by themselves, answer a different question: \emph{did the system's answer depend on the evidence it cites?} An entailing citation can be attached after an answer has already been produced. A model may ignore a decisive passage, follow a familiar prior, select the first document, or guess under missing evidence while still producing a citation that looks appropriate. Recent work makes the distinction increasingly consequential. ContextCite treats context attribution as a contributive question and tests how removing context affects model output \citep{cohenwang2024contextcite}. Counterfactual prompting has been used for RAG risk control \citep{chen2024risk}, and leave-one-out changes can reveal poisoned documents \citep{kumar2026raguard}. Work on knowledge conflicts shows that models may be faithful in an entailment sense while integrating evidence unevenly or positionally \citep{xu2024knowledge,yang2026contextconflict}. Meanwhile, evaluations of deep-research agents identify evidence integration and dependency-consistent reasoning as persistent bottlenecks \citep{zhang2025finder,guo2026mrlhdr}.
+They do not, by themselves, answer a different question: \emph{did the system's answer depend on the evidence it cites?} An entailing citation can be attached after an answer has already been produced. A model may ignore a decisive passage, follow a familiar prior, select the first document, or guess under missing evidence while still producing a citation that looks appropriate. Recent work makes the distinction increasingly consequential. ContextCite and RAGONITE use context removal to estimate which evidence contributed to a generation \citep{cohenwang2024contextcite,saharoy2024ragonite}. Counterfactual prompting and set-level verification have been used for RAG risk control and selective abstention \citep{chen2024risk,qiu2026surerag}, while leave-one-out changes can reveal poisoned documents \citep{kumar2026raguard}. Deceptive Grounding shows that real citations and high measured faithfulness can coexist with entity-attribution failure \citep{caruzzo2026deceptive}. Work on knowledge conflicts further shows that models may integrate evidence unevenly or positionally \citep{xu2024knowledge,yang2026contextconflict}. Meanwhile, evaluations of deep-research agents identify evidence integration and dependency-consistent reasoning as persistent bottlenecks \citep{zhang2025finder,guo2026mrlhdr}.
 
 This paper argues that grounding evaluation needs both \emph{observational support} and \emph{interventional reliance}. We propose \method, a model-agnostic protocol built around matched evidence worlds. In a paired item, exactly one answer-determining proposition is changed while nuisance content is held fixed; a grounded system must change its answer accordingly. In a matched ablation, indispensable evidence is removed; a grounded system must abstain rather than complete the missing link from a shortcut. Citations are then checked against the oracle proof set in each world.
 
@@ -67,9 +66,9 @@ Citation generation can occur with the answer or after it. A recent comparison r
 
 \subsection{Context attribution and interventions}
 
-ContextCite attributes a generated statement to parts of the context using a sparse surrogate trained on context ablations \citep{cohenwang2024contextcite}. Its central intuition---removing a causally relevant source should affect the response---is aligned with this work. Our focus is complementary: rather than estimate a continuous contribution for an already generated statement, \method{} defines an end-to-end evaluation contract across a paired answer-changing intervention, a necessary-evidence ablation, and the citations emitted in each world.
+ContextCite attributes a generated statement to parts of the context using a sparse surrogate trained on context ablations \citep{cohenwang2024contextcite}. RAGONITE similarly computes counterfactual attribution by comparing a response with the response obtained after removing evidence \citep{saharoy2024ragonite}. Their central intuition---removing a causally relevant source should affect the response---is aligned with this work. Our focus is complementary: rather than estimate a contribution for an already generated statement, \method{} defines an end-to-end evaluation contract across two coherent answer-changing worlds, a necessary-evidence ablation, oracle answers and proof sets, and the citations emitted in each world.
 
-Counterfactual methods have also been used to estimate RAG risk and encourage abstention \citep{chen2024risk}. RAGuard uses leave-one-out decoding as one layer of a poisoning defense \citep{kumar2026raguard}. Attribution-bias studies intervene on source authorship metadata and show that attribution changes under nominally irrelevant cues \citep{abolghasemi2024bias}. We build on the logic of these interventions while targeting a general question: whether the final answer and its proof citations track the minimal evidence that defines the benchmark world.
+Counterfactual methods have also been used to estimate RAG risk and encourage abstention \citep{chen2024risk}. SURE-RAG treats evidence sufficiency as a set-level property and evaluates a selective verifier with counterfactual swaps and no-oracle controls \citep{qiu2026surerag}. RAGuard uses leave-one-out decoding as one layer of a poisoning defense \citep{kumar2026raguard}. Attribution-bias studies intervene on source authorship metadata and show that attribution changes under nominally irrelevant cues \citep{abolghasemi2024bias}. Deceptive Grounding isolates entity-attribution failures that remain invisible to conventional faithfulness and citation checks \citep{caruzzo2026deceptive}. These works establish that counterfactual removal, sufficiency verification, abstention, and attribution failure are not individually new. To our knowledge, prior protocols do not make correct behavior in both minimally different answer worlds, abstention after removing an indispensable proof element, and oracle proof-chain citations a single per-item pass condition. \method{} targets that joint behavioral contract.
 
 Counterfactual evaluation has a longer history in knowledge updating. MQuAKE asks whether edited facts propagate to multi-hop consequences \citep{zhong2023mquake}; ReCoE broadens counterfactual editing to multiple reasoning schemes \citep{hua2024recoe}. Those benchmarks evaluate changes to model knowledge. \method{} instead intervenes on inference-time evidence and does not modify model weights.
 
@@ -224,11 +223,14 @@ All entity and value names were constructed for the benchmark. This reduces the 
 
 \subsection{Models and prompting regimes}
 
-We evaluated the 4-bit MLX conversions \texttt{mlx-community/Qwen3-4B-4bit} and \texttt{mlx-community/Llama-3.2-3B-Instruct-4bit}. Qwen3 is documented in \citet{yang2025qwen3}; the Llama model family is documented in \citet{grattafiori2024llama}. Quantized conversions may not reproduce full-precision behavior, so the repository identifiers and environment are part of the experimental specification rather than incidental details.
+We evaluated the 4-bit MLX conversions \texttt{mlx-community/Qwen3-4B-4bit} and \texttt{mlx-community/Llama-3.2-3B-Instruct-4bit}. Qwen3 is documented in \citet{yang2025qwen3}, while the exact Llama-3.2-3B-Instruct release is documented by its model card \citep{meta2024llama32}. The two evaluated MLX conversion artifacts are identified separately \citep{mlxcommunity2025qwen3,mlxcommunity2024llama32}, and their immutable revisions are recorded in the public repository. Quantized conversions may not reproduce full-precision behavior, so these identifiers are part of the experimental specification rather than incidental details.
 
 Each model was tested under two system prompts. The \emph{baseline} required use of numbered sources, abstention when sources were insufficient, and a JSON answer with citation IDs. The \emph{evidence contract} additionally required the model to identify internally the smallest complete proof chain, answer only when every necessary link was explicit, and cite every proof source without irrelevant citations. Full prompts appear in \cref{app:prompts}.
 
 The design comprises $32\times 3\times 2\times 2=384$ generations: 32 items, three evidence conditions, two models, and two regimes. Decoding was greedy (temperature zero) with a 96-token maximum. All inference was local through MLX; no external API was used. The execution host was a 14-core Apple M4 Pro with 48~GB memory, running macOS 26.5.2, MLX 0.29.3, and MLX-LM 0.29.1. The experiment script writes the generated benchmark, raw responses, and summary metrics.
+
+\paragraph{Code and artifacts.}
+The complete source code for the tests is available at \url{https://github.com/sergiofigueras/causal-evidence-audit}. The repository contains the benchmark generator, the realized 32-item benchmark, both system prompts, all 384 raw generations, machine-readable summaries, model identifiers and revisions, validation code, and execution instructions.
 
 \subsection{Scoring and uncertainty}
 
@@ -350,7 +352,7 @@ The \dataset{} pilot shows why this layer is useful. Configurations that passed 
 
 \section*{Data and Code Availability}
 
-The accompanying reproducibility directory contains the benchmark generator, the realized 32-item benchmark, all 384 raw generations, machine-readable summaries, model identifiers, prompts, and execution instructions. The artifact is designed to run locally on Apple Silicon through MLX.
+The source code for the tests and the complete reproducibility artifact are publicly available at \url{https://github.com/sergiofigueras/causal-evidence-audit}. The repository contains the benchmark generator, the realized 32-item benchmark, all 384 raw generations, machine-readable summaries, model identifiers and revisions, prompts, validation code, and execution instructions. The artifact is designed to run locally on Apple Silicon through MLX.
 
 \section*{Acknowledgments}
 
@@ -418,10 +420,9 @@ An evaluation using \method{} should report:
     \item limitations covering source truth, retrieval failure, and external validity.
 \end{enumerate}
 
-\balance
 \begingroup
 \footnotesize
-\setlength{\bibsep}{2pt}
+\setlength{\bibsep}{1pt}
 \bibliographystyle{plainnat}
 \bibliography{references}
 \endgroup

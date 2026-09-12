@@ -2,6 +2,8 @@
 
 This bundle contains the LaTeX manuscript and the complete reproducibility artifact for the 32-item pilot.
 
+Public source-code repository: <https://github.com/sergiofigueras/causal-evidence-audit>
+
 ## Contents
 
 - `main.tex` — complete paper source.

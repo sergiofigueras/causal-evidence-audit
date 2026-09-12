@@ -1,0 +1,27 @@
+# Python environments and bytecode
+.venv/
+__pycache__/
+*.py[cod]
+
+# Downloaded model weights and caches
+.cache/
+models/
+*.safetensors
+
+# Generated experiment reruns
+reproduced_results/
+work/
+
+# LaTeX build products (the verified main.pdf is intentionally tracked)
+*.aux
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.log
+*.out
+*.synctex.gz
+*.xdv
+
+# macOS
+.DS_Store
