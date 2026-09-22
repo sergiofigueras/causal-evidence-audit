@@ -8,6 +8,16 @@ This repository contains the LaTeX manuscript and complete reproducibility artif
 - Public source-code repository: <https://github.com/sergiofigueras/causal-evidence-audit>
 - Immutable release: <https://github.com/sergiofigueras/causal-evidence-audit/releases/tag/v0.1.0>
 
+## TL;DR
+
+**Research question:** If a RAG system gives the correct answer and cites passages that support it, does that show that those passages determined the answer?
+
+**Short answer:** Not necessarily. A single observed response shows that the answer is compatible with its cited sources, but cannot show whether the system actually relied on them. It might use parametric memory, a shortcut, or a prior draft and attach a suitable citation afterward. The paper proposes the *Causal Evidence Audit* (CEA): ask the same question with the original evidence, with a minimal change to a decisive fact that changes the correct answer, and with an indispensable source removed. To pass, the system must answer correctly in both complete evidence worlds, abstain when the remaining evidence is insufficient, and cite the complete proof chain.
+
+**How this differs from existing tests:** Current approaches cover parts of this problem: [Ragas](https://docs.ragas.io/en/latest/concepts/metrics/available_metrics/) measures answer faithfulness to retrieved context; [ContextCite](https://proceedings.neurips.cc/paper_files/paper/2024/hash/adbea136219b64db96a9941e4249a857-Abstract-Conference.html) and [RAGONITE](https://arxiv.org/abs/2412.10571) use context removal for attribution; and [SURE-RAG](https://arxiv.org/abs/2605.03534) evaluates evidence sufficiency and selective abstention with counterfactual swaps. Among the approaches surveyed in the paper, none makes correct answers in both minimally different, answer-changing evidence worlds, abstention after removing indispensable evidence, and complete oracle proof citations a single per-item pass condition. CEA's contribution is this joint protocol, rather than any one test in isolation.
+
+**Pilot result:** Across 32 fictional items, two models, and two prompting regimes, the single-world pass rate for correct answers with complete proof citations ranged from 59.4% to 78.1%; the coverage-based joint causal score ranged from 0% to 31.3%. The gap exposes failures that a single-world check can miss, especially answering when an essential proof element is absent. This is a behavioral pilot with evidence supplied to the models: it does not test retrieval or establish how a model works internally.
+
 ## Contents
 
 - `main.tex` — complete paper source.
