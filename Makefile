@@ -4,7 +4,7 @@ ARTIFACT_DIR ?= reproducibility
 REPRODUCED_DIR ?= reproduced_results
 PY := $(VENV)/bin/python
 
-.PHONY: setup paper reproduce validate validate-reproduced compare reproduce-and-validate
+.PHONY: setup paper paper-pt-br reproduce validate validate-reproduced compare reproduce-and-validate
 
 setup:
 	$(PYTHON) -c 'import sys; assert sys.version_info >= (3, 12), "Python 3.12 or newer is required"'
@@ -14,6 +14,9 @@ setup:
 
 paper:
 	tectonic main.tex
+
+paper-pt-br:
+	tectonic main_pt_br.tex
 
 reproduce:
 	HF_HUB_DISABLE_XET=1 $(PY) reproducibility/run_causal_grounding_pilot.py \

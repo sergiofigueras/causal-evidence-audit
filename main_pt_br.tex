@@ -1,0 +1,620 @@
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[margin=0.72in,columnsep=0.24in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,multirow}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit}
+\usepackage{xcolor}
+\definecolor{accent}{HTML}{274C77}
+\definecolor{softgray}{HTML}{F2F3F5}
+\usepackage[colorlinks=true,allcolors=accent]{hyperref}
+\usepackage[nameinlink,capitalise]{cleveref}
+\crefname{proposition}{proposição}{proposições}
+\Crefname{proposition}{Proposição}{Proposições}
+\crefname{figure}{figura}{figuras}
+\Crefname{figure}{Figura}{Figuras}
+\crefname{table}{tabela}{tabelas}
+\Crefname{table}{Tabela}{Tabelas}
+\crefname{section}{seção}{seções}
+\Crefname{section}{Seção}{Seções}
+\usepackage{natbib}
+\usepackage{url}
+
+\newtheorem{proposition}{Proposição}
+\newtheorem{definition}{Definição}
+\newcommand{\ind}{\mathbb{I}}
+\newcommand{\botans}{\bot}
+\newcommand{\method}{\textsc{CEA}}
+\newcommand{\dataset}{\textsc{CEval-32}}
+
+\title{Além da implicação pelas citações: auditorias causais da evidência para modelos de linguagem com recuperação}
+\author{Sergio Luiz Wermuth Figueras}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Modelos de linguagem com recuperação de informação e agentes de pesquisa aprofundada costumam ser avaliados pela correção das respostas e pelo apoio que os trechos citados oferecem às afirmações geradas. Essas observações estabelecem a compatibilidade entre uma resposta e suas citações, mas não demonstram que as evidências citadas determinaram a resposta. Um sistema pode responder com base na memória paramétrica, em um atalho posicional ou em um rascunho anterior e acrescentar depois uma citação que implique a resposta. Apresentamos a \emph{Auditoria Causal da Evidência} (\method; nome original: \emph{Causal Evidence Audit}), um protocolo de avaliação de caixa-preta que complementa a implicação pelas citações com três testes controlados: mudança correta da resposta entre mundos pareados quando um fato decisivo muda, abstenção quando uma evidência indispensável é removida e cobertura das citações da cadeia de prova. Demonstramos construtivamente que a fundamentação causal não é identificável por nenhuma pontuação observacional de citações em um único mundo. Em seguida, instanciamos o protocolo em \dataset, um estudo piloto transparente com 32 itens de entidades fictícias, abrangendo consulta direta, composição em dois passos, comparação numérica e raciocínio condicional. Dois modelos de pesos abertos executados localmente, cada um testado com instruções comuns e com um contrato de evidências, produziram 384 gerações com decodificação gulosa. As taxas de aprovação observacional em um único mundo variaram de 59,4\% a 78,1\%, enquanto a pontuação causal conjunta baseada em cobertura variou de 0\% a 31,3\%; a pontuação estrita, que também rejeita citações excedentes, variou de 0\% a 31,3\%. Instruções mais fortes de fundamentação às vezes elevaram a pontuação observacional e reduziram a pontuação causal estrita. Especificamos ainda o \emph{CEA-Extended} (esquema de dados v2): múltiplas edições decisivas, perturbações que preservam a resposta, conjuntos alternativos de prova, ablações da suficiência das evidências e conflitos regidos por políticas, com uma auditoria separada da etapa de recuperação. Essas extensões são propostas e não apresentam novos resultados de modelos neste artigo. Uma auditoria finita de caixa-preta não pode certificar dependência universal das evidências. O estudo piloto mostra que o êxito em citações frequentemente divulgado pode ocultar suposições sem apoio e atribuições feitas após a resposta, e motiva o uso de intervenções pareadas nas evidências como uma camada de avaliação para RAG e agentes de pesquisa em contextos de alto risco.
+\end{abstract}
+
+\section{Introdução}
+
+A geração aumentada por recuperação (RAG) foi introduzida para combinar modelagem paramétrica de linguagem com conhecimento externo e atualizável \citep{lewis2020rag}. Sua promessa básica tem importância operacional: recuperar evidências relevantes, gerar uma resposta condicionada a elas e expor fontes que o leitor possa examinar. Sistemas com navegação, como o WebGPT \citep{nakano2021webgpt}, e modelos que apresentam evidências, como o GopherCite \citep{menick2022verified}, tornaram as citações uma interface central para a geração confiável de linguagem. O mesmo padrão fundamenta agentes de pesquisa que navegam, sintetizam informações e produzem relatórios extensos com muitas citações.
+
+A avaliação tem se concentrado no resultado visível. O método Attributable to Identified Sources (AIS) pergunta se as afirmações geradas são sustentadas pelas fontes identificadas \citep{rashkin2021ais}. Auditorias de busca generativa medem a completude e a correção das citações \citep{liu2023verifiability}; o ALCE avalia fluência, correção da resposta e qualidade das citações \citep{gao2023alce}. RAGAS, ARES e RAGCHECKER decompõem relevância da recuperação, fidelidade às fontes e qualidade da resposta com granularidade crescente \citep{es2023ragas,saadfalcon2023ares,ru2024ragchecker}. Essas medidas são necessárias. Elas indicam se a saída é compatível com as evidências apresentadas e se o leitor pode verificá-la.
+
+Elas, por si só, não respondem a outra pergunta: \emph{a resposta do sistema dependeu das evidências que ele citou?} Uma citação que implica a resposta pode ser anexada depois que a resposta já foi produzida. Um modelo pode ignorar um trecho decisivo, seguir uma expectativa anterior, selecionar o primeiro documento ou arriscar uma resposta sem evidências suficientes e, ainda assim, produzir uma citação aparentemente apropriada. Trabalhos recentes tornam essa distinção cada vez mais relevante. ContextCite e RAGONITE removem partes do contexto para estimar quais evidências contribuíram para uma geração \citep{cohenwang2024contextcite,saharoy2024ragonite}. Instruções contrafactuais e verificação no nível de conjuntos de evidências foram usadas para controlar riscos em RAG e promover abstenção seletiva \citep{chen2024risk,qiu2026surerag}, enquanto remoções individuais podem revelar documentos adulterados \citep{kumar2026raguard}. Deceptive Grounding mostra que citações reais e alta fidelidade medida podem coexistir com falhas na atribuição de entidades \citep{caruzzo2026deceptive}. Estudos sobre conflitos de conhecimento mostram ainda que modelos podem integrar evidências de maneira desigual ou conforme a posição no contexto \citep{xu2024knowledge,yang2026contextconflict}. Ao mesmo tempo, avaliações de agentes de pesquisa aprofundada identificam a integração de evidências e o raciocínio coerente com dependências como obstáculos persistentes \citep{zhang2025finder,guo2026mrlhdr}.
+
+Defendemos que a avaliação da fundamentação requer tanto \emph{apoio observacional} quanto \emph{dependência demonstrada por intervenção}. Propomos o \method, um protocolo independente do modelo, construído com mundos de evidências pareados. Em cada item pareado, altera-se exatamente uma proposição que determina a resposta; o conteúdo acessório permanece fixo ou é modificado por uma edição de balanceamento pré-declarada que não altera a resposta. Um sistema fundamentado deve mudar sua resposta de acordo. Em uma ablação pareada, remove-se uma evidência indispensável; um sistema fundamentado deve abster-se, em vez de preencher por atalho o elo ausente. As citações são então verificadas contra o conjunto de prova de referência em cada mundo.
+
+As contribuições são:
+\begin{enumerate}[leftmargin=*,itemsep=2pt,topsep=3pt]
+    \item uma distinção formal entre o apoio semântico das citações e a dependência causal das evidências, incluindo uma demonstração construtiva de não identificabilidade para métricas observacionais de um único mundo;
+    \item um protocolo de auditoria de caixa-preta e métricas conjuntas que combinam resposta correta entre mundos pareados, abstenção diante da ausência de evidência necessária e alinhamento das citações à cadeia de prova;
+    \item \dataset, um estudo piloto reproduzível com 32 itens de entidades fictícias e quatro famílias de raciocínio, além de 384 gerações brutas de dois modelos quantizados de pesos abertos sob dois regimes de instruções;
+    \item uma extensão versionada com múltiplas intervenções, provas alternativas admissíveis, políticas de resolução de conflitos, verificações separadas de recuperação e um limite explícito para a certificação finita de caixa-preta; e
+    \item um objetivo de treinamento baseado em intervenções e uma lista de informações a relatar para acervos reais de recuperação e agentes de pesquisa de longa duração.
+\end{enumerate}
+
+O estudo empírico é identificado intencionalmente como piloto. Seu objetivo é verificar se as medidas propostas revelam comportamentos ocultos por uma pontuação de um único mundo, e não classificar famílias de modelos nem estabelecer desempenho para uma população mais ampla.
+
+\section{Trabalhos relacionados}
+
+\subsection{Atribuição e avaliação de RAG}
+
+O AIS formalizou a questão de atribuir uma afirmação a fontes identificadas e validou um procedimento de anotação humana em tarefas de geração \citep{rashkin2021ais}. Auditorias posteriores de busca generativa operacionalizaram cobertura e precisão das citações e encontraram lacunas substanciais, apesar da fluência das respostas \citep{liu2023verifiability}. O ALCE ofereceu avaliação reproduzível de citações em diversos cenários de perguntas e respostas extensas \citep{gao2023alce}. O RAGAS avalia pipelines de RAG sem respostas de referência \citep{es2023ragas}; o ARES treina avaliadores leves com dados sintéticos e usa inferência auxiliada por predições \citep{saadfalcon2023ares}; o RAGCHECKER diagnostica falhas do recuperador e do gerador no nível das afirmações \citep{ru2024ragchecker}. Esses métodos estimam apoio, relevância, utilização ou preferência humana a partir de entradas e saídas observadas.
+
+A geração de citações pode ocorrer junto com a resposta ou depois dela. Uma comparação recente relata um compromisso entre cobertura e correção em paradigmas que geram citações durante a resposta ou posteriormente \citep{saxena2025citation}. Esse resultado torna a dependência da evidência especialmente importante: se uma citação é selecionada depois da redação, o apoio semântico não implica que a fonte tenha influenciado o texto. O \method{} independe do momento em que as citações são produzidas e testa o sistema completo sob alterações controladas nas evidências.
+
+\subsection{Atribuição ao contexto e intervenções}
+
+O ContextCite atribui uma afirmação gerada a partes do contexto usando um modelo substituto esparso treinado com ablações do contexto \citep{cohenwang2024contextcite}. De modo semelhante, o RAGONITE calcula atribuição contrafactual ao comparar uma resposta com a resposta obtida após a remoção de evidências \citep{saharoy2024ragonite}. A ideia central desses trabalhos---a remoção de uma fonte causalmente relevante deve afetar a resposta---está alinhada com este estudo. Nosso foco é complementar: em vez de estimar a contribuição para uma afirmação já gerada, o \method{} define um contrato de avaliação de ponta a ponta entre dois mundos coerentes que mudam a resposta, uma ablação de evidência necessária, respostas e conjuntos de prova de referência e as citações emitidas em cada mundo.
+
+Métodos contrafactuais também foram usados para estimar riscos em RAG e incentivar a abstenção \citep{chen2024risk}. O SURE-RAG trata a suficiência das evidências como uma propriedade do conjunto e avalia um verificador seletivo com trocas contrafactuais e controles sem oráculo \citep{qiu2026surerag}. O RAGuard usa decodificação com remoção de um elemento por vez como uma camada de defesa contra adulteração \citep{kumar2026raguard}. Estudos sobre viés de atribuição intervêm nos metadados de autoria das fontes e mostram que a atribuição muda em resposta a pistas nominalmente irrelevantes \citep{abolghasemi2024bias}. Deceptive Grounding isola falhas de atribuição de entidades que permanecem invisíveis às verificações convencionais de fidelidade e citações \citep{caruzzo2026deceptive}. Esses trabalhos mostram que remoção contrafactual, verificação de suficiência, abstenção e falhas de atribuição não são, isoladamente, novidades. Até onde sabemos, protocolos anteriores não reúnem em uma única condição de aprovação por item o comportamento correto em dois mundos de respostas distintos por uma alteração mínima, a abstenção após remover um elemento indispensável da prova e as citações da cadeia de prova de referência. O \method{} visa esse contrato comportamental conjunto.
+
+A avaliação contrafactual tem uma história mais longa na atualização de conhecimento. O MQuAKE pergunta se fatos editados se propagam até consequências de múltiplos passos \citep{zhong2023mquake}; o ReCoE amplia a edição contrafactual para vários esquemas de raciocínio \citep{hua2024recoe}. Esses benchmarks avaliam mudanças no conhecimento do modelo. O \method{}, por sua vez, intervém nas evidências fornecidas durante a inferência e não modifica os pesos do modelo.
+
+\subsection{Agentes de pesquisa e integração de evidências}
+
+O DeepResearch Bench avalia tarefas de produção de relatórios em nível especializado, citações efetivas e precisão das citações \citep{du2025deepresearch}. O ReportBench verifica a consistência das afirmações citadas e a factualidade das afirmações não citadas em revisões geradas \citep{li2025reportbench}. O FINDER e sua taxonomia de falhas identificam a integração de evidências, a verificação e o planejamento resiliente como fraquezas centrais \citep{zhang2025finder}. O Mr.LHDR estende a avaliação a grafos longos e multimodais de dependências e relata uma grande diferença entre a precisão da resposta final e o êxito estrito coerente com as dependências \citep{guo2026mrlhdr}. Esses achados motivam uma auditoria capaz de localizar se uma conclusão de pesquisa acompanha suas evidências decisivas. O \method{} foi concebido como uma camada adicional para esses benchmarks, sem substituir avaliações de cobertura, qualidade da redação, autoridade das fontes ou factualidade.
+
+\section{Por que o apoio das citações não basta}
+
+\subsection{Formulação do problema}
+
+Seja $q$ uma consulta e $E=(e_1,\ldots,e_m)$ um conjunto ordenado de evidências. Um sistema $A$ retorna uma resposta e um conjunto de citações,
+\begin{equation}
+    A(q,E)=(\hat y, C), \qquad C\subseteq\{1,\ldots,m\}.
+\end{equation}
+Seja $y^*(q,E)$ a resposta de referência, e seja $G(q,E)$ um conjunto mínimo de prova de referência: os índices dos documentos necessários para derivar $y^*$ segundo a semântica do benchmark. O símbolo de abstenção $\botans$ indica que $E$ não determina uma resposta única.
+
+Um avaliador de apoio observacional vê uma única tupla realizada $(q,E,\hat y,C)$. Ele pode verificar a correção, se $E_C$ implica $\hat y$, se todas as afirmações da resposta têm citações e se estas são relevantes. Essas propriedades dependem do resultado observado. A dependência da evidência é uma propriedade do mapeamento $E\mapsto A(q,E)$ entre os mundos de evidências possíveis.
+
+\begin{definition}[Apoio observacional das citações]
+Para um predicado de apoio $S$, uma saída tem apoio observacional quando $S(q,E,\hat y,C)=1$. O predicado pode ser implementado por pessoas, por inferência em linguagem natural, por um modelo de linguagem avaliador ou por um oráculo controlado de prova.
+\end{definition}
+
+\begin{definition}[Resposta às intervenções nas evidências]
+Para uma intervenção válida $T$ que altera evidências determinantes da resposta, um sistema responde adequadamente em $(q,E,T)$ quando sua saída muda para a resposta de referência de $T(E)$ e permanece correta em $E$.
+\end{definition}
+
+\subsection{Um resultado de não identificabilidade}
+
+\begin{proposition}[Não identificabilidade em um único mundo]
+Nenhum avaliador que observe apenas $(q,E_0,\hat y,C)$ em um mundo de evidências pode, sem hipóteses adicionais, identificar se $\hat y$ depende causalmente de $E_0$.
+\end{proposition}
+
+\begin{proof}
+Fixe um mundo observado $E_0$ com resposta de referência $y_0$ e um conjunto de citações $C_0$ que implica essa resposta. Construa um sistema responsivo $A_R$ que calcula $y^*(q,E)$ e cita seu conjunto de prova. Construa um sistema a posteriori $A_P$ que retorna a resposta memorizada $y_0$ e anexa $C_0$ sempre que for avaliado em $E_0$. Os dois sistemas produzem a mesma tupla observada em $E_0$; portanto, qualquer avaliador restrito a essa tupla lhes atribui a mesma pontuação. Escolha agora uma intervenção válida $T$ tal que $y^*(q,T(E_0))=y_1\neq y_0$. Por construção, $A_R$ retorna $y_1$, enquanto $A_P$ pode continuar retornando $y_0$. Sua dependência da evidência difere, embora a observação no único mundo seja idêntica. Portanto, essa observação, isoladamente, não permite identificar a dependência.
+\end{proof}
+
+A proposição não afirma que métricas observacionais sejam inúteis. Ela afirma que essas métricas identificam outra propriedade. A implicação protege o leitor contra afirmações sem apoio no resultado apresentado; a intervenção testa se o comportamento do sistema é regido pelas evidências. Um sistema confiável que usa evidências precisa de ambas.
+
+\begin{proposition}[Auditorias finitas de caixa-preta não certificam dependência universal]
+\label{prop:finite}
+Seja $\mathcal{X}$ um domínio de mundos de evidências que contém um mundo válido fora do conjunto finito $Q$ consultado por uma auditoria. Sem restrições à classe de funções do sistema auditado, passar em todas as consultas de $Q$ não implica dependência correta das evidências em todos os mundos de $\mathcal{X}$. Isso também vale quando as consultas finitas são escolhidas adaptativamente.
+\end{proposition}
+
+\begin{proof}
+Faça $A_R$ retornar a resposta de referência e uma prova admissível em todo mundo com resposta determinada, e abster-se em todo mundo com evidências insuficientes. Execute a auditoria finita contra $A_R$ e chame de $Q$ o conjunto consultado. Escolha $x^*\in\mathcal{X}\setminus Q$. Defina $A_B(x)=A_R(x)$ para todo $x\neq x^*$, mas faça $A_B$, em $x^*$, produzir uma resposta incorreta, uma citação sem apoio ou uma suposição em vez de abster-se. Como a auditoria observa as mesmas respostas e citações em todas as consultas de $Q$, ela segue o mesmo percurso adaptativo e atribui a $A_B$ a mesma pontuação de $A_R$. Ainda assim, $A_B$ falha em $x^*$. A aleatorização altera a probabilidade de encontrar $x^*$, mas não transforma logicamente uma sequência finita de observações em garantia de correção universal.
+\end{proof}
+
+O resultado diz respeito a sistemas irrestritos de caixa-preta em domínios não testados exaustivamente. Ele não exclui estimativas populacionais com plano amostral declarado, garantias sob hipóteses estruturais explícitas ou testes exaustivos de um domínio genuinamente finito. Tampouco identifica mecanismos neurais internos: a auditoria estabelece o comportamento nas intervenções amostradas.
+
+\section{A Auditoria Causal da Evidência}
+
+\subsection{Mundos de evidências pareados}
+
+Para cada item de base, quem elabora a auditoria especifica uma consulta $q$, dois mundos de evidências $E^{(0)}$ e $E^{(1)}$, respostas de referência distintas $y^{(0)}$ e $y^{(1)}$ e conjuntos de prova de referência $G^{(0)}$ e $G^{(1)}$. Os mundos diferem por uma edição mínima $T$ que determina a resposta, tal que
+\begin{equation}
+ E^{(1)}=T(E^{(0)}), \qquad y^{(1)}\neq y^{(0)}.
+\end{equation}
+Todas as características não causais que possam ser controladas na prática---quantidade de documentos, estilo, frequência das entidades, frequência com que a resposta é mencionada e ordem---devem permanecer fixas ou ser explicitamente equilibradas por uma edição que preserve a resposta e tenha sua função documentada.
+
+A auditoria também constrói um mundo com ablação $E^{(-)}$ removendo de $E^{(0)}$ um elemento indispensável da prova. A resposta de referência passa a ser $\botans$. Uma intervenção acessória opcional $P$ permuta documentos irrelevantes ou altera metadados não semânticos sem mudar a resposta de referência. Essa quarta condição testa a invariância seletiva, mas não integrou o estudo piloto.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+    node distance=3.5mm and 5mm,
+    box/.style={draw=black!55,rounded corners=1pt,fill=softgray,align=center,font=\scriptsize,minimum width=25mm,minimum height=9mm},
+    resultbox/.style={draw=accent,very thick,rounded corners=1pt,align=center,font=\scriptsize,minimum width=22mm,minimum height=8mm},
+    arr/.style={-{Latex[length=1.8mm]},thick,draw=black!65}
+]
+\node[box] (w0) {Mundo 0\\fato decisivo $a$};
+\node[resultbox,right=of w0] (a0) {resposta $y^{(0)}$\\cita $G^{(0)}$};
+\node[box,below=of w0] (w1) {Mundo 1\\fato decisivo $b$};
+\node[resultbox,right=of w1] (a1) {resposta $y^{(1)}$\\cita $G^{(1)}$};
+\node[box,below=of w1] (wm) {Ablação\\fato decisivo ausente};
+\node[resultbox,right=of wm] (am) {abstenção $\botans$\\sem alegar prova};
+\draw[arr] (w0)--(a0);
+\draw[arr] (w1)--(a1);
+\draw[arr] (wm)--(am);
+\draw[{Latex[length=1.6mm]}-{Latex[length=1.6mm]},dashed,draw=accent] ([xshift=-2mm]w0.south west)--node[left,font=\tiny,align=right]{edição\\mínima} ([xshift=-2mm]w1.north west);
+\end{tikzpicture}
+\caption{Auditoria Causal da Evidência com três condições. A aprovação exige comportamento correto em todos os mundos pareados, e não apenas uma citação que implique a resposta em um deles.}
+\label{fig:audit}
+\end{figure}
+
+\subsection{Métricas}
+
+Seja $(\hat y^{(w)},C^{(w)})=A(q,E^{(w)})$. A correspondência exata da resposta pode ser substituída por uma avaliação semântica adequada à tarefa, desde que o avaliador seja definido antes da avaliação.
+
+\paragraph{Consistência da resposta contrafactual.}
+\begin{equation}
+\mathrm{CRC}_i=\ind[\hat y_i^{(0)}=y_i^{(0)}\;\wedge\;\hat y_i^{(1)}=y_i^{(1)}].
+\end{equation}
+Como as duas respostas de referência são diferentes, essa métrica testa a mudança correta da resposta, não apenas a instabilidade da saída.
+
+\paragraph{Abstenção por necessidade de evidência.}
+\begin{equation}
+\mathrm{ENA}_i=\ind[\hat y_i^{(-)}=\botans].
+\end{equation}
+A ENA penaliza o preenchimento de uma lacuna nas evidências com uma resposta sem apoio. Não é uma métrica genérica de recusa: a abstenção é correta somente no mundo pareado com ablação.
+
+\paragraph{Precisão e cobertura das citações da prova.}
+Para $w\in\{0,1\}$,
+\begin{align}
+ \mathrm{PCR}_i^{(w)} &= \frac{|C_i^{(w)}\cap G_i^{(w)}|}{|G_i^{(w)}|},\\
+ \mathrm{PCP}_i^{(w)} &= \frac{|C_i^{(w)}\cap G_i^{(w)}|}{|C_i^{(w)}|},
+\end{align}
+Define-se PCP como zero para um conjunto vazio de citações quando $G$ não é vazio. PCR verifica se todos os documentos necessários à prova foram citados; PCP penaliza citações excedentes. Seja $V_i^{(-)}$ o indicador de que toda citação emitida no mundo com ablação identifica um documento realmente presente nesse mundo. Quando houver anotações confiáveis, devem-se preferir conjuntos de prova no nível de trechos.
+
+\paragraph{Pontuações conjuntas.}
+A pontuação baseada em cobertura impõe uma condição rígida de aprovação por item:
+\begin{equation}
+\mathrm{CES}^{\mathrm{cov}}_i=\mathrm{CRC}_i\,\mathrm{ENA}_i\,V_i^{(-)}
+\prod_{w\in\{0,1\}}\ind[\mathrm{PCR}_i^{(w)}=1].
+\end{equation}
+A pontuação estrita exige ainda citações exatas da prova em ambos os mundos completos e nenhuma citação no mundo com ablação:
+\begin{equation}
+\begin{aligned}
+\mathrm{CES}^{\mathrm{strict}}_i={}&\mathrm{CRC}_i\,\mathrm{ENA}_i\,V_i^{(-)}
+\ind[C_i^{(-)}=\varnothing]\\
+&\times\prod_{w\in\{0,1\}}\ind[C_i^{(w)}=G_i^{(w)}].
+\end{aligned}
+\end{equation}
+As pontuações do conjunto de dados são médias macro dos itens. A construção multiplicativa é intencional: alta precisão das respostas não compensa suposições quando faltam evidências, e citar muitos documentos não compensa a omissão de um elo necessário da prova.
+
+\paragraph{Aprovação observacional em um único mundo.}
+Para comparação, o estudo piloto relata
+\begin{equation}
+\mathrm{OBS}_i=\ind[\hat y_i^{(0)}=y_i^{(0)}]\ind[\mathrm{PCR}_i^{(0)}=1].
+\end{equation}
+OBS é um indicador substituto controlado para o padrão comum ``resposta correta com citações de apoio completas''. Não se afirma que ele reproduza todas as métricas de atribuição existentes.
+
+\subsection{Requisitos de validade da auditoria}
+
+Uma intervenção só é informativa se o mundo contrafactual for coerente e a edição realmente determinar a resposta. Recomendamos cinco critérios de validação da construção:
+\begin{enumerate}[leftmargin=*,itemsep=1pt,topsep=3pt]
+    \item \textbf{Minimalidade:} alterar o menor número de proposições atômicas compatível com um mundo alternativo coerente.
+    \item \textbf{Distinção entre respostas:} verificar independentemente que as respostas de referência diferem.
+    \item \textbf{Completude da prova:} anotar todas as fontes necessárias, inclusive os elos de múltiplos passos.
+    \item \textbf{Equilíbrio de fatores acessórios:} controlar posição, extensão, sobreposição lexical, estilo de apresentação das fontes e frequência com que a resposta é mencionada.
+    \item \textbf{Validade da ablação:} confirmar que a remoção torna a resposta indeterminada, em vez de apenas dificultá-la.
+\end{enumerate}
+Para agentes que acessam a Web aberta, o controle exato é difícil. Uma alternativa prática é congelar uma coleção recuperada, intervir nos documentos ou nas afirmações dessa coleção e avaliar a etapa de síntese separadamente da recuperação. Intervenções de ponta a ponta na recuperação podem então ser acrescentadas como segunda camada.
+
+\section{CEA-Extended (esquema v2)}
+\label{sec:extended}
+
+As definições anteriores e todos os números do estudo piloto pertencem ao protocolo CEA original de três condições, preservado como \emph{paper-v0.1}. Esta seção especifica o \emph{CEA-Extended} (esquema de dados v2) como protocolo prospectivo. Seus exemplos determinísticos de construção testam a especificação, não modelos de linguagem. Nenhum item do CEval-32, geração arquivada ou agregado publicado do estudo piloto é reavaliado aqui.
+
+\subsection{Suficiência das evidências e provas alternativas}
+
+Sob uma semântica de domínio e uma política de conflitos $\pi$ registradas
+previamente, seja $\mathcal{G}_{\pi}(q,E,a)$ a família de todos os conjuntos
+de documentos anotados, admissíveis e mínimos por inclusão, suficientes
+para estabelecer a resposta $a$ no mundo $E$. Os documentos mantêm
+identificadores estáveis entre edições e reordenações; para afirmações
+contraditórias, $\pi$ determina quais fontes são admissíveis. Defina
+$y^*_{\pi}(q,E)=a$ somente se a aplicação de $\pi$ estabelecer exatamente
+uma resposta; caso contrário, $y^*_{\pi}(q,E)=\botans$. Uma família com duas
+provas independentes, como $\{\{D1,D2\},\{D3,D4\}\}$, representa redundância
+genuína, não uma prova conjuntiva que exige quatro documentos. Escreva
+$\mathcal{G}_w(a)$ para $\mathcal{G}_{\pi}(q,E^{(w)},a)$. Para um mundo com
+resposta determinada, os dois contratos de citações são
+\begin{align}
+\mathrm{Cov}_{w}(C,a)
+ &= \ind[C\subseteq\mathrm{IDs}(E^{(w)})]\,
+    \ind[\exists G\in\mathcal{G}_w(a):G\subseteq C],\\
+\mathrm{Exact}_{w}(C,a)
+ &= \ind[C\in\mathcal{G}_w(a)].
+\end{align}
+O contrato de cobertura permite citações adicionais de documentos presentes,
+ao passo que o contrato exato aceita \emph{uma} prova mínima completa e rejeita
+tanto elos ausentes quanto citações excedentes. Nenhum deles exige citar a
+união das provas alternativas. No contrato exato, a abstenção tem um conjunto
+vazio de citações. Essas definições substituem a regra de um único conjunto
+de prova de referência apenas no CEA-Extended; elas não alteram
+retroativamente PCR, PCP ou CES do estudo piloto.
+
+\subsection{Famílias de intervenções pré-declaradas}
+
+Para cada item de base, construa uma família finita e versionada de mundos e
+registre, para cada um, a resposta esperada e todas as provas mínimas
+admissíveis:
+\begin{enumerate}[leftmargin=*,itemsep=1pt,topsep=3pt]
+    \item \textbf{Múltiplas edições decisivas:} crie ao menos duas edições coerentes, concebidas de forma independente, $T_1,\ldots,T_K$ ($K\geq2$), cada uma com $y^*_{\pi}(q,T_k(E^{(0)}))\neq y^*_{\pi}(q,E^{(0)})$. Registre as proposições alteradas e controle pistas ligadas aos tokens da resposta e à posição. As respostas alternativas das edições não precisam ser todas diferentes entre si.
+    \item \textbf{Perturbações que preservam a resposta:} varie a ordem dos documentos, metadados irrelevantes, a redação de distratores ou fatos não decisivos por meio de $P_j$, verificando $y^*_{\pi}(q,P_j(E^{(0)}))=y^*_{\pi}(q,E^{(0)})$. Exigem-se correção e uma prova admissível; identificadores de citações idênticos não são necessários se mais de uma prova continuar válida.
+    \item \textbf{Duas classes de ablação:} uma remoção de \emph{necessidade} $R_\bot$ deve eliminar todas as provas admissíveis e tornar a resposta indeterminada; a saída correta é $\botans$. Uma remoção de \emph{redundância} $R_+$ elimina um caminho de prova, mas mantém outro caminho completo; a saída correta continua sendo a resposta, acompanhada de uma prova remanescente. O comportamento esperado é definido pelo oráculo, não pelo simples fato da remoção.
+    \item \textbf{Conflitos regidos por políticas:} insira afirmações incompatíveis em uma coleção coerente e aplique uma política fixa $\pi$ de autoridade, versão ou data das fontes. Uma prova admissível preferida de modo inequívoco determina a resposta; um empate não resolvido leva a $\botans$. A política e a proveniência devem ser fixadas antes da observação das saídas.
+\end{enumerate}
+O validador do esquema v2 exige, por caso, uma condição de base, pelo menos
+dois contrafactuais decisivos e ao menos uma condição de perturbação
+acessória, ablação de necessidade, ablação de redundância e conflito. Isso
+verifica a completude dos papéis e a estabilidade dos identificadores, mas
+não substitui a revisão semântica dos documentos por especialistas.
+Seja $\mathcal{W}^{+}_i$ o conjunto dos mundos com resposta determinada:
+base, decisivos, com perturbação, com redundância e com conflito resolvido.
+Seja $\mathcal{W}^{\bot}_i$ o conjunto apenas dos mundos insuficientes
+verificados de forma independente: ablação de necessidade e conflito não
+resolvido. Seja $a_w=\ind[\hat y^{(w)}
+=y^*_{\pi}(q,E^{(w)})]$ e seja $f_w$ o indicador de que a resposta
+obedece ao esquema declarado de saída com resposta e citações. Para um
+mundo com resposta determinada, $c_{\mathrm{cov}}(w)$ e
+$c_{\mathrm{exact}}(w)$ são os contratos de citações acima. Para um mundo
+insuficiente, sejam $c_{\mathrm{cov}}(w)=\ind[C^{(w)}
+\subseteq\mathrm{IDs}(E^{(w)})]$ e
+$c_{\mathrm{exact}}(w)=\ind[C^{(w)}=\varnothing]$. O critério conjunto
+prospectivo para $s\in\{\mathrm{cov},\mathrm{exact}\}$ é
+\begin{equation}
+\mathrm{CES}^{(2,s)}_i=
+\prod_{w\in\mathcal{W}^{+}_i\cup\mathcal{W}^{\bot}_i}
+a_w\,f_w\,c_s(w).
+\end{equation}
+Relate as taxas dos componentes por classe de intervenção e a taxa conjunta
+de aprovação; um produto rígido isolado não revela qual falha ocorreu.
+Avalie sistemas estocásticos com um número declarado de execuções repetidas
+e agregue no nível do item, preservando a variação observada entre execuções.
+
+\subsection{Critérios de validade do oráculo e das ablações}
+
+Um caso só entra na pontuação depois que anotadores independentes ou um
+oráculo confiável do domínio estabelecem: (i) que cada mundo editado é
+internamente coerente e difere apenas nas proposições pré-declaradas;
+(ii) que a consulta tem a resposta anotada sob $\pi$; (iii) que toda prova
+anotada é suficiente e mínima por inclusão; e (iv) que nenhuma prova
+alternativa não anotada permanece após uma ablação de necessidade. Para
+acervos complexos, anotação dupla, resolução de divergências e busca dirigida
+por provas remanescentes reduzem erros do oráculo. Se uma remoção preservar
+outra derivação completa, classifique-a como mundo de redundância, em vez de
+pontuar a abstenção. Se a autoridade das fontes não puder ser resolvida sob
+$\pi$, anote explicitamente a insuficiência, em vez de escolher uma
+afirmação sem justificativa. Mundos inválidos são excluídos com justificativa,
+não convertidos em falhas do modelo.
+
+\subsection{Uma auditoria separada da etapa de recuperação}
+
+O experimento com um conjunto fixo de documentos testa a geração condicionada
+às evidências fornecidas. Para testar a recuperação, faça edições coerentes
+em uma versão congelada do acervo, execute novamente a indexação e a
+recuperação com a mesma consulta e a configuração declarada, e examine as
+evidências retornadas antes da geração. Registre se há uma prova admissível
+no acervo, se o recuperador retorna uma prova admissível completa dentro do
+orçamento fixo e se a resposta final satisfaz o contrato de síntese
+condicional. Uma falha de ponta a ponta pode então ser atribuída à ausência
+de evidências no acervo, a uma falha de recuperação ou a um erro de geração
+ou citação. Documentos equivalentes que permaneçam após uma edição devem
+contar como recuperação legítima. Relate separadamente os resultados com
+documentos fixos, os da recuperação e os de ponta a ponta; um resultado
+restrito à síntese nunca deve ser rotulado como resultado de RAG de ponta a
+ponta.
+
+\subsection{Generalização e interpretação}
+
+Registre previamente o gerador de intervenções e o código de pontuação; em
+seguida, avalie com moldes de itens, entidades, valores de resposta,
+estruturas de grafos de prova, domínios e estilos de apresentação das fontes
+reservados para teste. Mantenha os sistemas em ajuste afastados dos itens finais privados
+e publique os tipos de falha e intervalos de confiança calculados com a
+unidade amostral efetiva. Um intervalo de Wilson por caso, como no executor
+atual, descreve apenas a variação entre itens; moldes de itens ou domínios
+correlacionados exigem bootstrap agrupado ou análise hierárquica, além deste
+exemplo. As perturbações devem incluir combinações inéditas, e não apenas
+paráfrases dos moldes de itens usados no treinamento. Uma pontuação alta
+constitui evidência de dependência \emph{sob a distribuição e a política
+testadas}; não prova dependência universal nem revela mecanismos internos
+(\cref{prop:finite}). A veracidade das fontes e a legitimidade da política
+continuam sendo questões separadas.
+
+\section{Estudo piloto}
+
+\subsection{Perguntas de pesquisa}
+
+O estudo piloto aborda três perguntas específicas:
+\begin{enumerate}[label=\textbf{PP\arabic*.},leftmargin=*,itemsep=2pt,topsep=3pt]
+    \item A intervenção pareada revela uma lacuna oculta pela aprovação observacional em um único mundo?
+    \item A abstenção diante de evidências ausentes é um obstáculo distinto da capacidade de acompanhar um fato alterado?
+    \item Uma instrução mais forte sobre o contrato de evidências melhora de modo confiável a pontuação conjunta?
+\end{enumerate}
+
+\subsection{Conjunto de dados}
+
+O \dataset{} contém 32 itens, oito em cada uma das quatro famílias de raciocínio:
+\begin{itemize}[leftmargin=*,itemsep=1pt,topsep=3pt]
+    \item \textbf{Consulta direta:} uma frase de um registro determina o fluido refrigerante autorizado de um reator fictício.
+    \item \textbf{Composição em dois passos:} um registro de expedição seleciona um depósito, e uma segunda fonte associa esse depósito a uma cifra.
+    \item \textbf{Comparação numérica:} dois valores verificados e uma regra de classificação determinam qual estação fictícia ocupa a posição superior.
+    \item \textbf{Raciocínio condicional:} uma política com limiar e uma medição local determinam o protocolo exigido.
+\end{itemize}
+Todos os nomes de entidades e valores foram criados para o benchmark. Isso reduz a possibilidade de responder com conhecimento de mundo memorizado. Para cada item, o mundo 1 altera uma frase ou número decisivo do mundo 0. Nas famílias de consulta direta, dois passos e raciocínio condicional, todos os outros documentos permanecem inalterados. Na família de comparação, o valor explicitamente obsoleto em D4 também troca os tokens de valores alto e baixo para preservar o multiconjunto numérico entre os mundos; D4 é excluído da prova de referência e não afeta a resposta segundo a semântica do benchmark. A ablação remove o documento decisivo do mundo 0. Os distratores incluem estimativas obsoletas, testes preliminares, declarações de disponibilidade e descrições que não determinam a resposta. O arquivo do benchmark registra os dois mundos, as respostas esperadas, os conjuntos de citações de referência e o alvo da ablação.
+
+\subsection{Modelos e regimes de instruções}
+
+Avaliamos as conversões MLX de 4 bits \texttt{mlx-community/Qwen3-4B-4bit} e \texttt{mlx-community/Llama-3.2-3B-Instruct-4bit}. O Qwen3 é documentado por \citet{yang2025qwen3}, enquanto a versão exata do Llama-3.2-3B-Instruct é documentada em sua ficha de modelo \citep{meta2024llama32}. Os dois artefatos de conversão MLX avaliados são identificados separadamente \citep{mlxcommunity2025qwen3,mlxcommunity2024llama32}, e suas revisões imutáveis constam no repositório público. Conversões quantizadas podem não reproduzir o comportamento com precisão plena; por isso, esses identificadores fazem parte da especificação experimental e não são detalhes incidentais.
+
+Cada modelo foi testado com duas instruções de sistema. A \emph{instrução de base} exigia o uso de fontes numeradas, abstenção quando as fontes fossem insuficientes e uma resposta JSON com identificadores de citações. O \emph{contrato de evidências} também exigia que o modelo identificasse internamente a menor cadeia de prova completa, respondesse apenas quando todos os elos necessários estivessem explícitos e citasse todas as fontes da prova sem citações irrelevantes. As instruções integrais aparecem na \cref{app:prompts}.
+
+O desenho compreende $32\times 3\times 2\times 2=384$ gerações: 32 itens, três condições de evidências, dois modelos e dois regimes de instruções. A decodificação foi gulosa (temperatura zero), com máximo de 96 tokens. Toda a inferência ocorreu localmente por meio do MLX; nenhuma API externa foi usada. A execução incluída na versão publicada utilizou Python 3.14.6 em um Apple M4 Pro de 14 núcleos e 48~GB de memória, com macOS 26.5.2, MLX 0.32.2, MLX-LM 0.31.3 e Transformers 5.17.0. O script experimental grava o benchmark gerado, as respostas brutas por modelo, as métricas resumidas e um manifesto de proveniência legível por máquina com hashes das fontes e dos artefatos.
+
+\paragraph{Código e artefatos.}
+O código-fonte completo dos testes está disponível em \url{https://github.com/sergiofigueras/causal-evidence-audit}; a versão imutável dos artefatos está em \url{https://github.com/sergiofigueras/causal-evidence-audit/releases/tag/v0.1.0}. O repositório contém o gerador do benchmark, os 32 itens produzidos, as duas instruções de sistema, as 384 gerações brutas, resumos legíveis por máquina, identificadores e revisões dos modelos, um ambiente fixado por hashes, código de validação e instruções de execução.
+
+\subsection{Pontuação e incerteza}
+
+As respostas foram normalizadas quanto a maiúsculas, minúsculas e pontuação. Uma resposta foi considerada correta se contivesse exatamente o candidato fictício esperado e não o alternativo; expressões envoltórias como ``Protocol X'' eram permitidas. As abstenções foram reconhecidas por uma lista fixa que incluía \texttt{INSUFFICIENT}, ``not specified'' e ``cannot determine''. Os identificadores das citações foram validados contra o esquema JSON. A cobertura da prova de referência exigia todas as fontes anotadas; a correspondência estrita rejeitava fontes tanto ausentes quanto excedentes.
+
+Relatamos intervalos de confiança de Wilson de 95\% para proporções binárias. Esses intervalos quantificam a incerteza amostral dos 32 itens gerados a partir de moldes de itens, não a incerteza relativa a instruções, decodificadores, versões dos modelos, domínios ou distribuições de documentos naturais. Não relatamos testes de significância de hipótese nula porque o estudo piloto foi concebido como demonstração diagnóstica, não como inferência comparativa entre modelos.
+
+\section{Resultados}
+
+\begin{table*}[t]
+\centering
+\small
+\setlength{\tabcolsep}{5.2pt}
+\caption{Resultados do estudo piloto com 32 itens por modelo e regime de instruções. W0/W1 indicam a precisão das respostas nos mundos pareados; CRC, a consistência da resposta entre mundos; ENA, a abstenção quando falta evidência necessária; OBS, a aprovação observacional em um único mundo; CES$^{\mathrm{cov}}$ exige mudança correta da resposta, citações válidas na ablação, abstenção na ablação e citações completas da prova em ambos os mundos; CES$^{\mathrm{strict}}$ também rejeita citações excedentes nos mundos completos e qualquer citação na ablação. Valores em porcentagem.}
+\label{tab:main}
+\begin{tabular}{llrrrrrrr}
+\toprule
+Modelo & Instrução & W0 & W1 & CRC & ENA & OBS & CES$^{\mathrm{cov}}$ & CES$^{\mathrm{strict}}$\\
+\midrule
+Qwen3-4B & Base & 87,5 & 100,0 & 87,5 & 31,3 & 75,0 & 31,3 & 31,3\\
+Qwen3-4B & Contrato & 87,5 & 100,0 & 87,5 & 6,3 & \textbf{78,1} & 6,3 & 0,0\\
+Llama-3.2-3B & Base & 93,8 & 93,8 & \textbf{87,5} & 0,0 & 59,4 & 0,0 & 0,0\\
+Llama-3.2-3B & Contrato & 90,6 & 90,6 & 81,3 & \textbf{21,9} & \textbf{71,9} & 6,3 & 0,0\\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{PP1: o êxito observacional superestima a fundamentação conjunta}
+
+Nas quatro configurações de sistema, OBS variou de 59,4\% a 78,1\%, enquanto CES$^{\mathrm{cov}}$ variou de 0\% a 31,3\% (\cref{tab:main}). Para o Qwen3-4B com a instrução de base, OBS foi 75,0\% (IC de Wilson de 95\%: 57,9--86,7), mas a pontuação conjunta baseada em cobertura foi 31,3\% (18,0--48,6). Para o Llama-3.2-3B com a instrução de base, OBS foi 59,4\% (42,3--74,5) e a pontuação conjunta foi 0\% (0--10,7).
+
+Essa diferença é o principal achado do estudo piloto. Em uma inspeção convencional de um único mundo, muitas respostas continham a resposta esperada e citavam todas as fontes da prova de referência. A ablação pareada revelou que o mesmo sistema frequentemente respondia quando as evidências não determinavam uma resposta. Portanto, o problema não era apenas a falha em ler um fato alterado: CRC foi 87,5\% para ambos os sistemas com a instrução de base. A auditoria distingue acompanhar a evidência de reconhecer sua necessidade.
+
+\subsection{PP2: a abstenção é o componente limitante}
+
+ENA variou de 0\% a 31,3\%, bem abaixo da precisão das respostas nos mundos pareados em todas as configurações. O Qwen com a instrução de base absteve-se corretamente em 10 das 32 ablações. O Llama com a instrução de base não se absteve em nenhuma, embora tenha respondido corretamente aos dois mundos com evidências completas em 28 dos 32 pares. São casos típicos de resposta sem apoio: o comportamento correto na presença de evidências coexiste com suposições quando falta um elo da prova.
+
+As pontuações estritas por família refinam o diagnóstico. Com a instrução de base do Qwen, a consulta direta passou em todos os 8 itens; o raciocínio condicional passou em 2 de 8; e as famílias de dois passos e de comparação passaram em 0 de 8. Os contextos com ablação dessas duas últimas famílias ainda mencionavam candidatos plausíveis, o que parece induzir respostas a partir de evidências parciais. Esse padrão deve ser tratado como hipótese para um estudo maior, pois os moldes de itens de uma mesma família compartilham estrutura.
+
+\subsection{PP3: instruções mais fortes não garantem fundamentação causal}
+
+A instrução com contrato de evidências elevou OBS em 3,1 pontos percentuais para o Qwen e em 12,5 pontos para o Llama, mas não elevou de modo consistente as pontuações conjuntas. Para o Qwen, ENA caiu de 31,3\% para 6,3\%, CES$^{\mathrm{cov}}$ caiu na mesma medida e CES$^{\mathrm{strict}}$ chegou a zero. Para o Llama, ENA melhorou de 0\% para 21,9\% e CES$^{\mathrm{cov}}$ chegou a 6,3\%, mas a pontuação estrita continuou em zero.
+
+A diferença entre cobertura e pontuação estrita localiza o excesso de citações. Dois itens do Qwen e dois do Llama sob o contrato de evidências satisfizeram a mudança correta da resposta, a validade das citações na ablação, a abstenção correta na ablação e a cobertura completa das fontes de referência; nenhum satisfez o contrato de citações mais estrito nas três condições. O contrato de evidências frequentemente provocou citações de fontes adicionais e desnecessárias. Uma avaliação baseada apenas na presença de todas as citações exigidas recompensaria esse excesso, enquanto o alinhamento estrito à prova o expõe.
+
+Essas comparações de instruções são exploratórias. Decodificação gulosa, uma única redação de cada instrução, modelos pequenos e 32 moldes de itens não permitem estabelecer um efeito geral dos contratos de evidências. Elas mostram, porém, uma razão prática para avaliar diretamente a propriedade desejada: uma instrução pode melhorar o aspecto visível das citações sem melhorar o comportamento esperado diante das evidências.
+
+\section{Da avaliação ao treinamento}
+
+A construção pareada leva naturalmente a um objetivo de treinamento. Sejam $p_\theta(y\mid q,E)$ a distribuição das respostas, $p_\theta(c_j=1\mid q,E,y)$ a probabilidade de citar a fonte $j$ e $p_\theta^E=p_\theta(\cdot\mid q,E)$. Um objetivo de fundamentação causal pode complementar a perda usual da tarefa:
+\begin{align}
+\mathcal{L}_{\mathrm{CEA}} ={}& \mathcal{L}_{\mathrm{task}}
+-\lambda_{\mathrm{cf}}\sum_{w\in\{0,1\}}\log p_\theta(y^{(w)}\mid q,E^{(w)})\nonumber\\
+&-\lambda_{\mathrm{abs}}\log p_\theta(\botans\mid q,E^{(-)})\nonumber\\
+&+\lambda_{\mathrm{inv}}D_{\mathrm{KL}}\!\left(p_\theta^E\,\|\,p_\theta^{P(E)}\right)\nonumber\\
+&+\lambda_{\mathrm{cite}}\sum_j \mathrm{BCE}\!\left(p_\theta(c_j=1),\ind[j\in G]\right).
+\end{align}
+O termo contrafactual ensina a responder corretamente a mudanças decisivas; o termo de abstenção ensina a reconhecer a necessidade de evidências; o termo opcional de invariância desestimula a sensibilidade a permutações acessórias; e o termo de citações visa o conjunto de prova, em vez da quantidade de fontes citadas.
+
+Os mesmos dados podem apoiar a otimização por preferências sem exigir acesso aos logits. Para cada consulta, uma trajetória preferida responde corretamente aos dois mundos coerentes, abstém-se sob ablação e cita a prova mínima. Uma trajetória não preferida pode manter a resposta original após a inversão de um fato, supor uma resposta após a ablação, omitir um elo da prova ou acrescentar citações excedentes. As intervenções de treinamento e avaliação devem ser geradas a partir de moldes e domínios distintos, para evitar a aprendizagem de um padrão superficial de ``benchmark contrafactual''.
+
+Para agentes de pesquisa de longa duração, as intervenções podem ser aplicadas em diferentes níveis:
+\begin{itemize}[leftmargin=*,itemsep=1pt,topsep=3pt]
+    \item \textbf{No nível da afirmação:} altere um número, uma data, uma relação entre entidades ou um resultado experimental decisivo em uma versão congelada das fontes.
+    \item \textbf{No nível do documento:} substitua uma fonte por uma alternativa pareada e atualize as conclusões de referência que dependem dela.
+    \item \textbf{No nível das dependências:} intervenha em um nó intermediário de um grafo de pesquisa anotado e teste todas as conclusões afetadas.
+    \item \textbf{No nível da recuperação:} altere a disponibilidade ou a classificação do acervo e verifique se o agente recupera evidências equivalentes em outras fontes.
+\end{itemize}
+Os grafos de dependências do Mr.LHDR \citep{guo2026mrlhdr} são especialmente compatíveis com o terceiro desenho. ReportBench e DeepResearch Bench poderiam acrescentar versões pareadas das fontes para distinguir relatórios que apenas contêm apoio daqueles cujas conclusões acompanham a literatura fornecida \citep{li2025reportbench,du2025deepresearch}.
+
+\section{Discussão}
+
+\subsection{O que a auditoria estabelece}
+
+Ser aprovado no \method{} fornece evidência comportamental de que, dentro de uma família controlada de itens, o sistema acompanha as evidências determinantes da resposta, reconhece a ausência de um elo necessário e expõe as fontes de prova que utilizou. Isso é mais forte do que observar uma única vez uma citação que implique a resposta. Ainda assim, trata-se de um critério comportamental, não de uma explicação causal mecanística da computação neural interna. A palavra ``causal'' refere-se a intervenções nas evidências fornecidas ao sistema e aos seus efeitos sobre a saída, sob um modelo causal especificado para o benchmark.
+
+\subsection{O que a auditoria não estabelece}
+
+Primeiro, um modelo pode seguir fielmente evidências falsas ou maliciosas. A veracidade, a autoridade, a independência e a atualidade das fontes exigem avaliação separada. O GopherCite já observou que o apoio das evidências é apenas uma parte da confiabilidade \citep{menick2022verified}, enquanto estudos sobre conflitos de conhecimento e adulteração investigam o que ocorre quando as fontes discordam ou são adversariais \citep{wang2023conflicts,kumar2026raguard}. Segundo, a aprovação em itens controlados não implica pesquisa robusta na Web aberta. A recuperação pode falhar antes do início da síntese. Terceiro, a necessidade das citações depende da tarefa: um conjunto de prova mínimo sob um esquema de anotação pode não ser a única prova válida.
+
+\subsection{Por que usar uma pontuação conjunta rígida}
+
+Médias compostas podem ocultar falhas graves. Um sistema com excelente precisão no contexto completo, mas sem abstenção, pode parecer forte quando as métricas são combinadas em uma média. O CES usa uma conjunção porque o uso de evidências em contextos de alto risco constitui um contrato: o sistema deve acompanhar evidências decisivas, evitar afirmações quando a prova está incompleta e revelar a prova em que se apoiou. As métricas componentes devem sempre acompanhar a pontuação conjunta para que se possa diagnosticar a parte que falhou.
+
+\section{Limitações e ameaças à validade}
+
+\paragraph{Escala e estrutura do estudo piloto.}
+O conjunto de dados contém 32 itens em inglês gerados a partir de quatro moldes. Itens da mesma família não são amostras independentes de tarefas naturais de pesquisa. Portanto, os intervalos de Wilson descrevem apenas a variação entre itens e podem ser excessivamente otimistas quanto à generalização entre domínios.
+
+\paragraph{Abrangência dos modelos.}
+Apenas dois modelos pequenos, de pesos abertos e quantizados em 4 bits foram testados. A quantização, os formatos de conversa e a implementação do MLX podem afetar o comportamento. Os resultados não devem ser extrapolados para modelos abertos maiores, modelos proprietários ou produtos completos de pesquisa aprofundada.
+
+\paragraph{Ausência da etapa de recuperação.}
+O estudo piloto fixa o conjunto de evidências e avalia a síntese. Isso é deliberado para controlar as intervenções, mas exclui a formulação da consulta, a descoberta e a classificação das fontes, a navegação e os julgamentos sobre a qualidade das fontes. Uma auditoria completa de agentes deve relatar as camadas de recuperação e síntese separadamente e em conjunto.
+
+\paragraph{Artefatos das ablações.}
+A remoção de um documento altera a extensão do contexto e as posições. Um modelo pode responder a essas mudanças superficiais, e não à semântica das evidências. Trabalhos futuros devem usar marcadores substitutos pareados, remoções equilibradas quanto à posição e substituições por documentos irrelevantes, além de relatar a invariância sob permutações.
+
+\paragraph{Conjuntos de prova de referência.}
+As provas do estudo piloto não são ambíguas por construção, mas documentos reais permitem derivações alternativas e redundância entre fontes. Extensões para situações reais precisam de múltiplos conjuntos de prova válidos, anotações no nível de trechos e resolução de divergências por especialistas do domínio.
+
+\paragraph{Análise das respostas e das abstenções.}
+O analisador determinístico aceita variantes linguísticas fixas. Ele pode classificar incorretamente respostas incomuns, mas razoáveis. Relatórios abertos exigem validação humana e avaliadores semânticos definidos previamente.
+
+\paragraph{Estabilidade da execução.}
+A decodificação gulosa com temperatura zero elimina a aleatoriedade da amostragem, mas não implica determinismo byte a byte entre softwares, núcleos computacionais, formatos de conversa ou equipamentos. A versão publicada preserva as saídas brutas e um manifesto de proveniência; o comando de comparação distingue a reprodução das métricas agregadas da identidade exata do texto bruto.
+
+\paragraph{Limite da novidade.}
+O protocolo reúne ideias de avaliação de citações, atribuição ao contexto, controle contrafactual de riscos, avaliação de conflitos de conhecimento e benchmarks de pesquisa que consideram dependências. Sua contribuição é o contrato conjunto de ponta a ponta e o desenho de avaliação pareada, não a invenção isolada de ablações da entrada ou de testes contrafactuais.
+
+\section{Integridade da pesquisa e uso ético}
+
+Todas as afirmações numéricas deste manuscrito foram geradas pelo script incluído e pelas saídas brutas preservadas. Não foram usados dados de participantes humanos, dados privados nem chamadas a APIs externas. Entidades fictícias reduzem preocupações com privacidade e memorização. O artigo e o levantamento bibliográfico foram preparados com auxílio de IA; a responsabilidade pelas afirmações, citações, código publicado e artefatos permanece com o autor identificado. Este preprint não foi revisado por pares e não deve ser apresentado como pesquisa aceita ou validada de forma independente.
+
+O método pode aumentar a segurança ao expor respostas sem apoio, mas também pode ser usado indevidamente para otimizar sistemas de forma restrita contra moldes de intervenção conhecidos. Por isso, benchmarks públicos devem divulgar conjuntos transparentes de desenvolvimento e manter auditorias reservadas com estruturas distintas, renovadas periodicamente.
+
+\section{Conclusão}
+
+Uma citação pode tornar uma resposta verificável sem provar que ela se fundamentou na fonte citada. Essa distinção importa à medida que sistemas RAG e agentes de pesquisa produzem saídas cada vez mais elaboradas e ricas em citações. O \method{} acrescenta uma exigência simples: se a evidência decisiva mudar, a resposta deve mudar; se uma evidência indispensável for removida, o sistema deve abster-se; e as citações devem corresponder à prova.
+
+O estudo piloto com \dataset{} mostra a utilidade dessa camada. Configurações que passaram na verificação de resposta e citações em um único mundo em cerca de três quintos a quatro quintos dos itens obtiveram pontuações causais conjuntas muito menores, principalmente porque arriscaram respostas quando as evidências eram incompletas. Instruções mais fortes não corrigiram esse comportamento de forma consistente. São necessários estudos maiores, validados por especialistas, mas o princípio de avaliação já pode ser aplicado: alegações de geração fundamentada devem ser apoiadas por intervenções pareadas nas evidências, e não apenas pela implicação das citações.
+
+\section*{Disponibilidade dos dados e do código}
+
+O código-fonte dos testes e o artefato completo de reprodução estão disponíveis publicamente em \url{https://github.com/sergiofigueras/causal-evidence-audit}. A versão 0.1.0 está preservada em \url{https://github.com/sergiofigueras/causal-evidence-audit/releases/tag/v0.1.0}. O repositório contém o gerador do benchmark, os 32 itens produzidos, todas as 384 gerações brutas, resumos legíveis por máquina, identificadores e revisões dos modelos, instruções, um manifesto de proveniência, um ambiente fixado por hashes, código de validação e instruções de execução. O artefato foi concebido para execução local em Apple Silicon por meio do MLX e está disponível sob a licença MIT.
+
+\section*{Agradecimentos}
+
+Não há financiamento externo declarado. Não consta afiliação institucional.
+
+\appendix
+\section{Modelos de instruções}
+\label{app:prompts}
+
+As instruções a seguir são reproduzidas literalmente em inglês porque foram as entradas efetivamente usadas no experimento. As traduções identificadas abaixo são apenas informativas e não foram usadas para gerar os resultados publicados.
+
+\paragraph{Instrução de sistema de base (original).}
+\begin{quote}\small
+Answer the question using only the numbered sources. If the sources do not determine the answer, answer INSUFFICIENT. Return exactly one JSON object with keys answer and citations. citations must be a list of source IDs such as [``D1'']. Do not add prose.
+\end{quote}
+
+\noindent\emph{Tradução informativa:} Responda à pergunta usando apenas as fontes numeradas. Se as fontes não determinarem a resposta, responda \texttt{INSUFFICIENT}. Retorne exatamente um objeto JSON com as chaves \texttt{answer} e \texttt{citations}. \texttt{citations} deve ser uma lista de identificadores de fontes, como [``D1'']. Não acrescente texto explicativo.
+
+\paragraph{Instrução de sistema com contrato de evidências (original).}
+\begin{quote}\small
+Use only the numbered sources. Internally identify the smallest complete proof chain for the answer. Answer only when every necessary link is explicitly supported; otherwise answer INSUFFICIENT. Treat the current sources as authoritative even when their entities are unfamiliar. Return exactly one JSON object with keys answer and citations. citations must list every source in the proof chain and no irrelevant source. Do not add prose.
+\end{quote}
+
+\noindent\emph{Tradução informativa:} Use apenas as fontes numeradas. Identifique internamente a menor cadeia de prova completa para a resposta. Responda somente quando todos os elos necessários tiverem apoio explícito; caso contrário, responda \texttt{INSUFFICIENT}. Trate as fontes atuais como autoritativas mesmo quando suas entidades forem desconhecidas. Retorne exatamente um objeto JSON com as chaves \texttt{answer} e \texttt{citations}. \texttt{citations} deve listar todas as fontes da cadeia de prova e nenhuma fonte irrelevante. Não acrescente texto explicativo.
+
+\paragraph{Formato da instrução do usuário (original).}
+\begin{quote}\small\ttfamily
+SOURCES\par
+[D1] <document text>\par
+...\par
+[Dm] <document text>\par\smallskip
+QUESTION\par
+<query>
+\end{quote}
+
+\noindent\emph{Tradução informativa dos rótulos:} \texttt{SOURCES} significa ``FONTES''; \texttt{QUESTION} significa ``PERGUNTA''; \texttt{document text} significa ``texto do documento''; e \texttt{query} significa ``consulta''. Os identificadores de documentos e a estrutura da entrada permanecem iguais.
+
+\section{Exemplo detalhado de auditoria}
+
+Considere um item fictício de dois passos. No mundo 0, D1 encaminha a mensageira Vela por Aldermere, D2 afirma que Aldermere usa a cifra Galdite e D3 afirma que Bramblecross usa Hesper. A resposta correta é Galdite, com o conjunto de prova \{D1,D2\}. No mundo 1, somente D1 muda e encaminha Vela por Bramblecross; a resposta deve mudar para Hesper, com o conjunto de prova \{D1,D3\}. Na ablação, D1 é removido, de modo que o depósito é desconhecido e a saída correta é \texttt{INSUFFICIENT}. Uma resposta que indique Galdite com D1 e D2 no mundo 0 passa na verificação observacional. Ela só passa na auditoria causal se também responder Hesper com D1 e D3 no mundo 1 e se abstiver sob ablação.
+
+\section{Exemplo executável do CEA-Extended}
+\label{app:extendedfixture}
+
+O exemplo executável do esquema v2 em
+\path{reproducibility/extended_fixture.json} amplia essa estrutura fictícia.
+D1 encaminha Vela por Aldermere; D2 e D3 afirmam independentemente que
+Aldermere usa Galdite. D4 associa Hesper a Bramblecross, e D5 associa Orphic
+a Cedarholm. A resposta de base é Galdite, com duas provas mínimas:
+$\{D1,D2\}$ e $\{D1,D3\}$. Duas edições distintas em D1 encaminham Vela
+por Bramblecross ou Cedarholm e exigem, respectivamente, Hesper ou Orphic.
+Uma reordenação dos documentos preserva Galdite. A remoção de D2 preserva
+Galdite por meio de $\{D1,D3\}$; a remoção de D1 destrói \emph{ambos} os
+caminhos de prova e exige abstenção. Uma condição adicional transforma D6,
+antes neutro, em uma afirmação de autoridade inferior segundo a qual Vela
+passa por Bramblecross. A política de autoridade pré-declarada dá preferência
+a D1, de modo que a resposta permanece Galdite. Uma segunda condição de
+conflito atribui a D1 e D6 o mesmo nível de autoridade sem critério de
+desempate; o oráculo exige abstenção.
+
+O validador do exemplo verifica a matriz de papéis declarada, a estabilidade
+dos identificadores, as mudanças de resposta e a invariância, os caminhos
+de prova preservados ou destruídos, os metadados da política e os exemplos
+de citações para cobertura e correspondência exata. São verificações
+determinísticas da construção, não medidas de modelos nem substitutos da
+avaliação semântica independente de um acervo real.
+
+\section{Intervalos de incerteza}
+
+\begin{table}[h]
+\centering
+\footnotesize
+\caption{Intervalos de Wilson de 95\% para métricas selecionadas do estudo piloto; $n=32$ por linha.}
+\label{tab:ci}
+\begin{tabular}{llcc}
+\toprule
+Modelo & Instrução & OBS & CES$^{\mathrm{cov}}$\\
+\midrule
+Qwen3 & Base & 57,9--86,7 & 18,0--48,6\\
+Qwen3 & Contrato & 61,2--89,0 & 1,7--20,2\\
+Llama & Base & 42,3--74,5 & 0,0--10,7\\
+Llama & Contrato & 54,6--84,4 & 1,7--20,2\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Informações a relatar}
+
+Uma avaliação com o \method{} deve relatar:
+\begin{enumerate}[leftmargin=*,itemsep=1pt,topsep=3pt]
+    \item a unidade de intervenção e a regra de minimalidade;
+    \item como foram verificadas a coerência dos mundos e a distinção entre as respostas de referência;
+    \item todos os conjuntos de prova válidos e a granularidade das citações;
+    \item os controles de posição, extensão, estilo e sobreposição lexical;
+    \item a versão do modelo, o conjunto congelado de evidências recuperadas, as instruções, o decodificador e a configuração das ferramentas;
+    \item separadamente, CRC, ENA, precisão e cobertura das citações, CES$^{\mathrm{cov}}$ e CES$^{\mathrm{strict}}$;
+    \item os intervalos de incerteza e a unidade amostral que eles de fato descrevem;
+    \item as saídas brutas, o código do analisador ou avaliador e as regras de resolução de divergências; e
+    \item as limitações relativas à veracidade das fontes, às falhas de recuperação e à validade externa.
+\end{enumerate}
+
+Para o CEA-Extended, relate também a matriz completa das condições e de seus
+papéis, todas as provas mínimas alternativas, as ablações de necessidade e
+redundância, a política de conflitos pré-declarada, a revisão independente do
+oráculo, o plano amostral dos dados reservados para teste e os resultados da
+etapa de recuperação separadamente dos resultados da síntese.
+
+\begingroup
+\scriptsize
+\setlength{\bibsep}{0pt}
+\bibliographystyle{plainnat}
+\bibliography{references}
+\endgroup
+
+\end{document}

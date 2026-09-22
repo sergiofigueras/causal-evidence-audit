@@ -1,5 +1,7 @@
 # Beyond Citation Entailment
 
+**English** · [Português (Brasil)](README.pt-BR.md)
+
 [![validate](https://github.com/sergiofigueras/causal-evidence-audit/actions/workflows/validate.yml/badge.svg)](https://github.com/sergiofigueras/causal-evidence-audit/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -31,8 +33,10 @@ The schema-v2 runner's per-case Wilson intervals describe item-level variation o
 ## Contents
 
 - `main.tex` — complete paper source.
+- `main_pt_br.tex` — complete Brazilian Portuguese translation, including CEA-Extended.
 - `references.bib` — BibTeX bibliography with direct source URLs.
 - `main.pdf` — compiled verification copy.
+- `main_pt_br.pdf` — compiled Brazilian Portuguese paper.
 - `reproducibility/causal_audit_core.py` — standard-library benchmark, parser, scorer, and metric implementation.
 - `reproducibility/run_causal_grounding_pilot.py` — local MLX inference runner and provenance-manifest writer.
 - `reproducibility/benchmark.json` — exact 32-item paired-world benchmark used in the paper.
@@ -51,7 +55,7 @@ The schema-v2 runner's per-case Wilson intervals describe item-level variation o
 
 ## Validate the committed artifact
 
-Validation uses only the Python standard library. It regenerates the benchmark, reparses all 384 raw outputs, recomputes every stored score and summary, verifies source and artifact checksums, checks the manuscript's citation keys and publication links, and validates the independent schema-v2 construction fixture.
+Validation uses only the Python standard library. It regenerates the benchmark, reparses all 384 raw outputs, recomputes every stored score and summary, verifies source and artifact checksums, checks citation keys, publication links, and structural parity between the two manuscript languages, and validates the independent schema-v2 construction fixture.
 
 ```bash
 make validate
@@ -60,10 +64,11 @@ make validate
 ## Build the paper
 
 ```bash
-tectonic main.tex
+make paper
+make paper-pt-br
 ```
 
-The source also works with a conventional LaTeX/BibTeX toolchain supporting the packages declared in `main.tex`.
+Both sources also work with a conventional LaTeX/BibTeX toolchain supporting their declared packages. Experimental prompt templates remain in their original English for reproducibility; their Portuguese renderings are explicitly marked as explanatory translations.
 
 ## Reproduce the pilot
 
