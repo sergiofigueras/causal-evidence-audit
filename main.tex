@@ -33,7 +33,7 @@
 \maketitle
 
 \begin{abstract}
-Retrieval-augmented language models and deep-research agents are commonly evaluated by answer correctness and by whether cited passages support generated claims. These observations establish compatibility between an answer and its citations, but they do not establish that the cited evidence determined the answer. A system can answer from parametric memory, a positional shortcut, or a prior draft and attach an entailing citation afterward. We introduce the \emph{Causal Evidence Audit} (\method), a black-box evaluation protocol that complements citation entailment with three controlled tests: paired-world responsiveness when one decisive fact changes, abstention when indispensable evidence is removed, and proof-chain citation coverage. We show constructively that causal grounding is not identifiable from any single-world observational citation score. We then instantiate the protocol in \dataset, a transparent pilot of 32 fictional-entity items spanning direct lookup, two-hop composition, numerical comparison, and conditional reasoning. Two locally executed open-weight models, each tested with ordinary and evidence-contract prompts, produced 384 greedy-decoded generations. Single-world observational pass rates ranged from 59.4\% to 78.1\%, whereas the coverage-based joint causal score ranged from 0\% to 31.3\%; the strict score, which also rejects extraneous citations, ranged from 0\% to 31.3\%. Stronger grounding instructions sometimes increased the observational score while decreasing the strict causal score. These pilot results are not a model leaderboard. They demonstrate that commonly reported citation success can conceal unsupported guessing and post-hoc attribution, and motivate paired evidence interventions as a minimum evaluation layer for high-stakes RAG and research agents.
+Retrieval-augmented language models and deep-research agents are commonly evaluated by answer correctness and by whether cited passages support generated claims. These observations establish compatibility between an answer and its citations, but they do not establish that the cited evidence determined the answer. A system can answer from parametric memory, a positional shortcut, or a prior draft and attach an entailing citation afterward. We introduce the \emph{Causal Evidence Audit} (\method), a black-box evaluation protocol that complements citation entailment with three controlled tests: paired-world responsiveness when one decisive fact changes, abstention when indispensable evidence is removed, and proof-chain citation coverage. We show constructively that causal grounding is not identifiable from any single-world observational citation score. We then instantiate the protocol in \dataset, a transparent pilot of 32 fictional-entity items spanning direct lookup, two-hop composition, numerical comparison, and conditional reasoning. Two locally executed open-weight models, each tested with ordinary and evidence-contract prompts, produced 384 greedy-decoded generations. Single-world observational pass rates ranged from 59.4\% to 78.1\%, whereas the coverage-based joint causal score ranged from 0\% to 31.3\%; the strict score, which also rejects extraneous citations, ranged from 0\% to 31.3\%. Stronger grounding instructions sometimes increased the observational score while decreasing the strict causal score. We additionally specify \emph{CEA-Extended} (dataset schema v2): multiple decisive edits, answer-preserving perturbations, alternative proof sets, sufficient-evidence ablations, and policy-governed conflicts, with a separate retrieval-stage audit. These extensions are proposed and have no new model results here. A finite black-box audit cannot certify universal reliance. The pilot demonstrates that commonly reported citation success can conceal unsupported guessing and post-hoc attribution, and motivates paired evidence interventions as an evaluation layer for high-stakes RAG and research agents.
 \end{abstract}
 
 \section{Introduction}
@@ -51,7 +51,8 @@ The contributions are:
     \item a formal separation between semantic citation support and causal evidence reliance, including a constructive non-identifiability result for single-world observational metrics;
     \item a black-box audit protocol and joint metrics that combine paired-world responsiveness, necessity-aware abstention, and proof-chain citation alignment;
     \item \dataset, a reproducible 32-item pilot with fictional entities and four reasoning families, together with 384 raw generations from two quantized open-weight models under two prompting regimes; and
-    \item an intervention-based training objective and reporting checklist for extending the protocol to real retrieval corpora and long-horizon research agents.
+    \item a versioned extension with multiple interventions, admissible alternative proofs, conflict policies, separate retrieval checks, and an explicit limit on finite black-box certification; and
+    \item an intervention-based training objective and reporting checklist for real retrieval corpora and long-horizon research agents.
 \end{enumerate}
 
 The empirical study is intentionally labeled a pilot. Its purpose is to test whether the proposed measurements reveal behavior hidden by a single-world score, not to rank model families or establish population-level performance.
@@ -107,6 +108,17 @@ Fix an observed world $E_0$ with oracle answer $y_0$ and an entailing citation s
 \end{proof}
 
 The proposition does not say observational metrics are unhelpful. It says they identify a different property. Entailment protects the reader against unsupported claims in the displayed artifact; intervention tests whether the system behavior is governed by the evidence. A trustworthy evidence-using system needs both.
+
+\begin{proposition}[Finite black-box audits do not certify universal reliance]
+\label{prop:finite}
+Let $\mathcal{X}$ be an evidence-world domain containing a valid world outside a finite set $Q$ queried by an audit. Without restrictions on the audited system's function class, passing every query in $Q$ does not imply correct evidence reliance on every world in $\mathcal{X}$. This also holds when the finite queries are chosen adaptively.
+\end{proposition}
+
+\begin{proof}
+Let $A_R$ return the oracle answer and an admissible proof in every answerable world, and abstain in every insufficient world. Run the finite audit against $A_R$ and call its queried set $Q$. Choose $x^*\in\mathcal{X}\setminus Q$. Define $A_B(x)=A_R(x)$ for all $x\neq x^*$, but at $x^*$ let $A_B$ output an incorrect answer, an unsupported citation, or a non-abstaining guess. Because the audit observes the same answer and citations at every query in $Q$, it follows the same adaptive path and gives $A_B$ the same score as $A_R$. Yet $A_B$ fails at $x^*$. Randomization changes the probability of encountering $x^*$, not the logical implication from a finite realized transcript to universal correctness.
+\end{proof}
+
+The result concerns unrestricted black-box systems over non-exhaustively tested domains. It does not rule out population estimates with a declared sampling design, guarantees under explicit structural assumptions, or exhaustive testing of a genuinely finite domain. It also does not identify internal neural mechanisms: the audit establishes behavior on sampled interventions.
 
 \section{The Causal Evidence Audit}
 
@@ -201,6 +213,120 @@ An intervention is only informative if the counterfactual world is coherent and 
     \item \textbf{Ablation validity:} confirm that removal makes the answer underdetermined rather than merely harder.
 \end{enumerate}
 For open-web agents, exact control is difficult. A practical alternative is to freeze a retrieved snapshot, perform document-level or claim-level interventions inside the snapshot, and evaluate the synthesis stage separately from retrieval. End-to-end retrieval interventions can then be added as a second layer.
+
+\section{CEA-Extended (schema v2)}
+\label{sec:extended}
+
+The preceding definitions and all pilot numbers belong to the original three-condition CEA protocol, preserved as \emph{paper-v0.1}. This section specifies \emph{CEA-Extended} (dataset schema v2) as a prospective protocol. Its deterministic construction fixtures test the specification, not any language model. No CEval-32 item, archived generation, or published pilot aggregate is rescored here.
+
+\subsection{Evidence sufficiency and alternative proofs}
+
+Under a preregistered domain semantics and conflict policy $\pi$, let
+$\mathcal{G}_{\pi}(q,E,a)$ be the family of all annotated, inclusion-minimal,
+admissible document sets sufficient to establish answer $a$ in world $E$.
+Documents have stable identifiers across edits and reorderings; for
+contradictory claims, $\pi$ determines which sources are admissible. Define
+$y^*_{\pi}(q,E)=a$ only if exactly one answer is established after applying
+$\pi$; otherwise $y^*_{\pi}(q,E)=\botans$. A family with two independent
+proofs, such as $\{\{D1,D2\},\{D3,D4\}\}$, represents genuine redundancy,
+not a four-document conjunctive proof. Write $\mathcal{G}_w(a)$ for
+$\mathcal{G}_{\pi}(q,E^{(w)},a)$. For an answerable world, the two
+citation contracts are
+\begin{align}
+\mathrm{Cov}_{w}(C,a)
+ &= \ind[C\subseteq\mathrm{IDs}(E^{(w)})]\,
+    \ind[\exists G\in\mathcal{G}_w(a):G\subseteq C],\\
+\mathrm{Exact}_{w}(C,a)
+ &= \ind[C\in\mathcal{G}_w(a)].
+\end{align}
+The coverage contract permits extra present citations, whereas the exact
+contract accepts \emph{one} complete minimal proof and rejects both missing
+links and citation padding. Neither requires citing the union of alternative
+proofs. An abstention has an empty citation set in the exact contract.
+These definitions replace the single-gold-set citation rule only in
+CEA-Extended; they do not retroactively change pilot PCR, PCP, or CES.
+
+\subsection{Predeclared intervention families}
+
+For each base item, construct a finite, versioned family of worlds and
+record the expected answer and all admissible minimal proofs for each:
+\begin{enumerate}[leftmargin=*,itemsep=1pt,topsep=3pt]
+    \item \textbf{Multiple decisive edits:} create at least two independently designed coherent edits $T_1,\ldots,T_K$ ($K\geq2$), each with $y^*_{\pi}(q,T_k(E^{(0)}))\neq y^*_{\pi}(q,E^{(0)})$. Record changed propositions and control answer-token and position cues. The edits need not have mutually distinct alternative answers.
+    \item \textbf{Answer-preserving perturbations:} vary document order, irrelevant metadata, distractor wording, or non-decisive facts through $P_j$ while checking $y^*_{\pi}(q,P_j(E^{(0)}))=y^*_{\pi}(q,E^{(0)})$. Correctness and an admissible proof are required; identical citation IDs are not required if more than one proof remains valid.
+    \item \textbf{Two ablation classes:} a \emph{necessity} removal $R_\bot$ must eliminate every admissible proof and make the answer underdetermined; the correct output is $\botans$. A \emph{redundancy} removal $R_+$ deletes one proof path while leaving another complete path; the correct output remains the answer with a surviving proof. The oracle, not the mere act of removal, assigns the expected behavior.
+    \item \textbf{Policy-governed conflicts:} insert incompatible claims in a coherent snapshot and apply a fixed policy $\pi$ for source authority, version, or time. A uniquely preferred admissible proof gives its answer; an unresolved tie yields $\botans$. The policy and provenance must be fixed before outputs are observed.
+\end{enumerate}
+The schema-v2 validator requires one baseline, at least two decisive
+counterfactuals, and at least one nuisance, necessity ablation, redundancy
+ablation, and conflict condition per case. This checks role completeness and
+stable IDs; it cannot replace expert semantic review of the documents.
+Let $\mathcal{W}^{+}_i$ contain the answerable base, decisive,
+perturbation, redundancy, and resolved-conflict worlds, and let
+$\mathcal{W}^{\bot}_i$ contain only independently verified insufficient
+necessity and unresolved-conflict worlds. Let $a_w=\ind[\hat y^{(w)}
+=y^*_{\pi}(q,E^{(w)})]$ and let $f_w$ indicate that the response
+obeys the declared answer-and-citation output schema. For an answerable
+world, $c_{\mathrm{cov}}(w)$
+and $c_{\mathrm{exact}}(w)$ are the citation contracts above. For an
+insufficient world, let $c_{\mathrm{cov}}(w)=\ind[C^{(w)}
+\subseteq\mathrm{IDs}(E^{(w)})]$ and
+$c_{\mathrm{exact}}(w)=\ind[C^{(w)}=\varnothing]$. The prospective joint
+criterion for $s\in\{\mathrm{cov},\mathrm{exact}\}$ is
+\begin{equation}
+\mathrm{CES}^{(2,s)}_i=
+\prod_{w\in\mathcal{W}^{+}_i\cup\mathcal{W}^{\bot}_i}
+a_w\,f_w\,c_s(w).
+\end{equation}
+Report component rates by intervention class and the joint pass rate; a hard
+product alone does not reveal which failure occurred. Evaluate stochastic
+systems with a declared number of repeated runs and aggregate at the item
+level, retaining the observed run-to-run spread.
+
+\subsection{Oracle and ablation validity gates}
+
+A case enters the score only after independent annotators or a trusted
+domain oracle establish: (i) that each edited world is internally coherent
+and differs only in predeclared propositions; (ii) that the query has the
+annotated answer under $\pi$; (iii) that every annotated proof is sufficient
+and inclusion-minimal; and (iv) that no unannotated alternate proof remains
+after a necessity ablation. For complex corpora, dual annotation,
+disagreement adjudication, and targeted search for surviving proofs reduce
+oracle error. If a removal leaves another complete derivation, classify it
+as a redundancy world rather than scoring abstention. If source authority
+cannot be resolved under $\pi$, annotate insufficiency explicitly rather
+than silently choosing one claim. Invalid worlds are excluded with reasons,
+not converted to model failures.
+
+\subsection{A separate retrieval-stage audit}
+
+The fixed-bundle experiment tests generation conditioned on supplied
+evidence. To test retrieval, make coherent edits to a frozen corpus
+snapshot, rerun indexing and retrieval with the same query and declared
+configuration, and inspect the returned evidence before generation. Record
+whether an admissible proof is available in the corpus, whether the
+retriever returns a complete admissible proof within the fixed budget, and
+whether the final answer satisfies the conditional synthesis contract.
+An end-to-end failure can then be attributed to missing corpus evidence,
+retrieval miss, or generation/citation error. Equivalent documents that
+survive an edit must count as legitimate recovery. Report the fixed-bundle,
+retrieval, and end-to-end results separately; a synthesis-only result is
+never labeled an end-to-end RAG result.
+
+\subsection{Generalization and interpretation}
+
+Pre-register the intervention generator and scoring code, then evaluate on
+held-out templates, entities, answer values, proof-graph shapes, domains,
+and source styles. Keep systems being tuned away from the private final
+items, and publish failure modes plus confidence intervals using the
+actual sampling unit. A per-case Wilson interval, as in the current
+runner, describes item-level variation only; correlated templates or
+domains require a grouped bootstrap or hierarchical analysis beyond
+this fixture. Perturbations should include unseen combinations,
+not just paraphrases of training templates. A high score is evidence of
+reliance \emph{under the tested distribution and policy}; it cannot prove
+universal reliance or reveal internal mechanisms
+(\cref{prop:finite}). Source truth and policy legitimacy remain separate
+questions.
 
 \section{Pilot Study}
 
@@ -392,6 +518,30 @@ QUESTION\par
 
 Consider a fictional two-hop item. In world 0, D1 routes courier Vela through Aldermere, D2 states that Aldermere uses the Galdite cipher, and D3 states that Bramblecross uses Hesper. The correct answer is Galdite with proof set \{D1,D2\}. In world 1, only D1 changes and routes Vela through Bramblecross; the answer must change to Hesper with proof set \{D1,D3\}. In the ablation, D1 is removed, so the depot is unknown and the correct output is \texttt{INSUFFICIENT}. A response that answers Galdite in world 0 with D1 and D2 passes the observational check. It passes the causal audit only if it also answers Hesper with D1 and D3 in world 1 and abstains under ablation.
 
+\section{CEA-Extended Fixture}
+\label{app:extendedfixture}
+
+The executable schema-v2 fixture at
+\path{reproducibility/extended_fixture.json} extends this fictional
+structure. D1 routes Vela through Aldermere; both D2 and D3 independently
+state that Aldermere uses Galdite. D4 assigns Hesper to Bramblecross and
+D5 assigns Orphic to Cedarholm. The base answer is Galdite, with two
+minimal proofs, $\{D1,D2\}$ and $\{D1,D3\}$. Two distinct edits to D1
+route Vela through Bramblecross or Cedarholm and require Hesper or Orphic,
+respectively. A reordered bundle preserves Galdite. Removing D2 preserves
+Galdite through $\{D1,D3\}$; removing D1 destroys \emph{both} proof paths
+and requires abstention. A final condition changes neutral D6 into a
+lower-authority claim that Vela routes through Bramblecross. The predeclared authority
+policy prefers D1, so the answer remains Galdite. A second conflict
+condition assigns D1 and D6 equal unresolved authority; its oracle
+requires abstention.
+
+The fixture validator checks the declared role matrix, stable IDs,
+answer changes and invariance, surviving and destroyed proof paths,
+policy metadata, and the coverage/exact citation examples. These are
+deterministic construction assertions, not model measurements and not
+a substitute for independent semantic adjudication of a real corpus.
+
 \section{Uncertainty Intervals}
 
 \begin{table}[h]
@@ -411,7 +561,7 @@ Llama & Contract & 54.6--84.4 & 1.7--20.2\\
 \end{tabular}
 \end{table}
 
-\section{Recommended Reporting Checklist}
+\section{Reporting Checklist}
 
 An evaluation using \method{} should report:
 \begin{enumerate}[leftmargin=*,itemsep=1pt,topsep=3pt]
@@ -425,6 +575,11 @@ An evaluation using \method{} should report:
     \item raw outputs, parser or judge code, and adjudication rules; and
     \item limitations covering source truth, retrieval failure, and external validity.
 \end{enumerate}
+
+For CEA-Extended, additionally report the complete condition-role matrix,
+all alternative minimal proofs, both necessity and redundancy ablations,
+the predeclared conflict policy, independent oracle review, held-out
+sampling design, and retrieval-stage results separately from synthesis.
 
 \begingroup
 \scriptsize

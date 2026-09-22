@@ -18,6 +18,16 @@ This repository contains the LaTeX manuscript and complete reproducibility artif
 
 **Pilot result:** Across 32 fictional items, two models, and two prompting regimes, the single-world pass rate for correct answers with complete proof citations ranged from 59.4% to 78.1%; the coverage-based joint causal score ranged from 0% to 31.3%. The gap exposes failures that a single-world check can miss, especially answering when an essential proof element is absent. This is a behavioral pilot with evidence supplied to the models: it does not test retrieval or establish how a model works internally.
 
+## CEA-Extended (dataset schema v2): proposed protocol
+
+The paper now specifies an extension for cases where a single changed fact and a single gold proof could give misleading results. A schema-v2 case includes the baseline, at least two independent answer-changing edits, an answer-preserving perturbation, an ablation that removes every valid proof, an ablation that leaves an alternative proof intact, and a condition with an explicit conflict-resolution policy.
+
+For each answerable world, annotators record **all admissible minimal proof sets**. Coverage accepts citations containing any one complete proof; the strict score accepts citations equal to any one proof. A removal requires abstention only after an independent oracle confirms that no alternative proof survives. Conflicting sources follow a policy fixed before evaluation; an unresolved conflict calls for abstention. A separate retrieval audit reruns indexing and retrieval on edited corpus snapshots and distinguishes missing corpus evidence, retrieval misses, and synthesis errors. Held-out templates, domains, proof shapes, and source styles test generalization.
+
+This is a **prospective protocol**, with one deterministic construction fixture and executable validation assertions. It has no new model scores. The original paper pilot, its 32 items, all 384 raw generations, and published metrics remain unchanged. Passing a finite black-box audit is evidence for the tested worlds, not proof that a system always relies on evidence; the manuscript gives a formal counterexample.
+
+The schema-v2 runner's per-case Wilson intervals describe item-level variation only. Correlated templates and domains need a separate grouped analysis before making population-level claims.
+
 ## Contents
 
 - `main.tex` — complete paper source.
@@ -32,6 +42,8 @@ This repository contains the LaTeX manuscript and complete reproducibility artif
 - `reproducibility/run_manifest.json` — runtime, model revision, decoder, source, and artifact hashes.
 - `reproducibility/validate_artifacts.py` — deep integrity validation and reproduction comparison.
 - `reproducibility/validate_manuscript.py` — citation and publication-metadata checks.
+- `reproducibility/extended_fixture.json` — deterministic schema-v2 worked case; not a model-response artifact.
+- `reproducibility/validate_extended_fixture.py` — structural and logical assertions for the worked case.
 - `requirements.in` — direct runtime dependencies.
 - `requirements.txt` — fully resolved, hash-locked Python environment.
 - `Makefile` — setup, compilation, validation, reproduction, and comparison commands.
@@ -39,7 +51,7 @@ This repository contains the LaTeX manuscript and complete reproducibility artif
 
 ## Validate the committed artifact
 
-Validation uses only the Python standard library. It regenerates the benchmark, reparses all 384 raw outputs, recomputes every stored score and summary, verifies source and artifact checksums, and checks the manuscript's citation keys and publication links.
+Validation uses only the Python standard library. It regenerates the benchmark, reparses all 384 raw outputs, recomputes every stored score and summary, verifies source and artifact checksums, checks the manuscript's citation keys and publication links, and validates the independent schema-v2 construction fixture.
 
 ```bash
 make validate

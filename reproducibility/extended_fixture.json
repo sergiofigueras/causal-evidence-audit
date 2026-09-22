@@ -1,0 +1,149 @@
+{
+  "schema_version": 2,
+  "name": "Deterministic protocol construction fixture, not model results",
+  "cases": [
+    {
+      "id": "vela-seal",
+      "question": "Which seal is assigned to courier Vela?",
+      "conditions": [
+        {
+          "id": "baseline",
+          "family": "baseline",
+          "documents": [
+            {"id": "D1", "text": "Courier Vela routes through Aldermere."},
+            {"id": "D2", "text": "Aldermere uses the Galdite seal."},
+            {"id": "D3", "text": "The Aldermere registry independently lists the Galdite seal."},
+            {"id": "D4", "text": "Bramblecross uses the Hesper seal."},
+            {"id": "D5", "text": "Cedarholm uses the Orphic seal."},
+            {"id": "D6", "text": "Maintenance inspection was completed."}
+          ],
+          "expected_answer": "Galdite",
+          "proof_sets": [["D1", "D2"], ["D1", "D3"]],
+          "changed_document_ids": [],
+          "removed_document_ids": [],
+          "rationale": "D1 supplies Vela's depot; D2 and D3 are independent sufficient seal records for that depot."
+        },
+        {
+          "id": "route-bramblecross",
+          "family": "counterfactual",
+          "documents": [
+            {"id": "D1", "text": "Courier Vela routes through Bramblecross."},
+            {"id": "D2", "text": "Aldermere uses the Galdite seal."},
+            {"id": "D3", "text": "The Aldermere registry independently lists the Galdite seal."},
+            {"id": "D4", "text": "Bramblecross uses the Hesper seal."},
+            {"id": "D5", "text": "Cedarholm uses the Orphic seal."},
+            {"id": "D6", "text": "Maintenance inspection was completed."}
+          ],
+          "expected_answer": "Hesper",
+          "proof_sets": [["D1", "D4"]],
+          "changed_document_ids": ["D1"],
+          "removed_document_ids": [],
+          "rationale": "Only Vela's depot changes; the Hesper answer requires D1 and D4."
+        },
+        {
+          "id": "route-cedarholm",
+          "family": "counterfactual",
+          "documents": [
+            {"id": "D1", "text": "Courier Vela routes through Cedarholm."},
+            {"id": "D2", "text": "Aldermere uses the Galdite seal."},
+            {"id": "D3", "text": "The Aldermere registry independently lists the Galdite seal."},
+            {"id": "D4", "text": "Bramblecross uses the Hesper seal."},
+            {"id": "D5", "text": "Cedarholm uses the Orphic seal."},
+            {"id": "D6", "text": "Maintenance inspection was completed."}
+          ],
+          "expected_answer": "Orphic",
+          "proof_sets": [["D1", "D5"]],
+          "changed_document_ids": ["D1"],
+          "removed_document_ids": [],
+          "rationale": "A second independent depot edit changes the required answer to Orphic."
+        },
+        {
+          "id": "reordered-sources",
+          "family": "nuisance",
+          "documents": [
+            {"id": "D5", "text": "Cedarholm uses the Orphic seal."},
+            {"id": "D4", "text": "Bramblecross uses the Hesper seal."},
+            {"id": "D3", "text": "The Aldermere registry independently lists the Galdite seal."},
+            {"id": "D2", "text": "Aldermere uses the Galdite seal."},
+            {"id": "D1", "text": "Courier Vela routes through Aldermere."},
+            {"id": "D6", "text": "Maintenance inspection was completed."}
+          ],
+          "expected_answer": "Galdite",
+          "proof_sets": [["D1", "D2"], ["D1", "D3"]],
+          "changed_document_ids": [],
+          "removed_document_ids": [],
+          "rationale": "Only source order changes, while IDs and claims remain stable."
+        },
+        {
+          "id": "missing-route",
+          "family": "ablation",
+          "documents": [
+            {"id": "D2", "text": "Aldermere uses the Galdite seal."},
+            {"id": "D3", "text": "The Aldermere registry independently lists the Galdite seal."},
+            {"id": "D4", "text": "Bramblecross uses the Hesper seal."},
+            {"id": "D5", "text": "Cedarholm uses the Orphic seal."},
+            {"id": "D6", "text": "Maintenance inspection was completed."}
+          ],
+          "expected_answer": null,
+          "proof_sets": [],
+          "changed_document_ids": [],
+          "removed_document_ids": ["D1"],
+          "rationale": "D1 is in every baseline proof; without Vela's route no seal can be determined."
+        },
+        {
+          "id": "alternate-registry",
+          "family": "redundancy",
+          "documents": [
+            {"id": "D1", "text": "Courier Vela routes through Aldermere."},
+            {"id": "D3", "text": "The Aldermere registry independently lists the Galdite seal."},
+            {"id": "D4", "text": "Bramblecross uses the Hesper seal."},
+            {"id": "D5", "text": "Cedarholm uses the Orphic seal."},
+            {"id": "D6", "text": "Maintenance inspection was completed."}
+          ],
+          "expected_answer": "Galdite",
+          "proof_sets": [["D1", "D3"]],
+          "changed_document_ids": [],
+          "removed_document_ids": ["D2"],
+          "rationale": "Removing D2 leaves the independent D1+D3 proof complete."
+        },
+        {
+          "id": "lower-authority-conflict",
+          "family": "conflict",
+          "documents": [
+            {"id": "D1", "text": "Courier Vela routes through Aldermere."},
+            {"id": "D2", "text": "Aldermere uses the Galdite seal."},
+            {"id": "D3", "text": "The Aldermere registry independently lists the Galdite seal."},
+            {"id": "D4", "text": "Bramblecross uses the Hesper seal."},
+            {"id": "D5", "text": "Cedarholm uses the Orphic seal."},
+            {"id": "D6", "text": "Courier Vela routes through Bramblecross."}
+          ],
+          "expected_answer": "Galdite",
+          "proof_sets": [["D1", "D2"], ["D1", "D3"]],
+          "changed_document_ids": ["D6"],
+          "removed_document_ids": [],
+          "resolution_policy": "authority",
+          "authority_document_ids": ["D1"],
+          "rationale": "D1 is the predeclared authoritative route record; D6 changes from a neutral note to a lower-authority conflicting route."
+        },
+        {
+          "id": "unresolved-conflict",
+          "family": "conflict",
+          "documents": [
+            {"id": "D1", "text": "Courier Vela routes through Aldermere."},
+            {"id": "D2", "text": "Aldermere uses the Galdite seal."},
+            {"id": "D3", "text": "The Aldermere registry independently lists the Galdite seal."},
+            {"id": "D4", "text": "Bramblecross uses the Hesper seal."},
+            {"id": "D5", "text": "Cedarholm uses the Orphic seal."},
+            {"id": "D6", "text": "Courier Vela routes through Bramblecross."}
+          ],
+          "expected_answer": null,
+          "proof_sets": [],
+          "changed_document_ids": ["D6"],
+          "removed_document_ids": [],
+          "resolution_policy": "abstain",
+          "rationale": "D1 and D6 are assigned equal unresolved authority, so the route and answer are underdetermined."
+        }
+      ]
+    }
+  ]
+}

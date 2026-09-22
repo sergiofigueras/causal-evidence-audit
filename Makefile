@@ -26,8 +26,10 @@ validate:
 	$(PYTHON) -m py_compile reproducibility/run_causal_grounding_pilot.py
 	$(PYTHON) -m py_compile reproducibility/validate_artifacts.py
 	$(PYTHON) -m py_compile reproducibility/validate_manuscript.py
+	$(PYTHON) -m py_compile reproducibility/validate_extended_fixture.py
 	$(PYTHON) reproducibility/validate_artifacts.py --artifact-dir $(ARTIFACT_DIR)
 	$(PYTHON) reproducibility/validate_manuscript.py
+	$(PYTHON) reproducibility/validate_extended_fixture.py
 
 validate-reproduced:
 	$(PYTHON) reproducibility/validate_artifacts.py --artifact-dir $(REPRODUCED_DIR)
